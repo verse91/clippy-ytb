@@ -179,9 +179,29 @@
 
 @font-face {
   font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Semibold.otf') format('otf');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF-Pro-Display';
   src: url('/assets/fonts/components-fonts/SF-Pro-Display-Bold.otf') format('otf');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 /* End of Selection */
+
+.lab-bg::before {
+
+  overflow: hidden;
+
+  max-width: 100vw;
+
+  max-height: 100vh;
+
+  box-sizing: border-box;
+
+}

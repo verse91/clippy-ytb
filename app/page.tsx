@@ -1,34 +1,40 @@
 import { BackGround } from "@/components/ui/squares-background";
 import ShinyText from "@/components/ui/texts/shiny-text";
-// import GradientText from "@/components/ui/texts/gradient-text";
+import { TextShimmerWave } from "@/components/ui/texts/text-wave";
 import Navbar from "@/components/ui/navbar";
+import { BoxChat } from "@/components/ui/box-chat";
 
-export default function SquaresDemo() {
+export default function Home() {
   return (
-    <div className="relative h-screen w-full">
-      <BackGround />
-      <Navbar />
-      {
-        /* Main content area */
+    <div className="relative min-h-screen w-full">
+      <div className="fixed inset-0 z-0">
+        <BackGround />
+      </div>
+      <div className="relative z-10">
+        <Navbar />
         <div
-          className="absolute top-20 left-0 w-full h-full flex items-start justify-center pt-32 pointer-events-none select-none"
+          className="w-full h-full flex items-start justify-center pt-48"
           style={{ fontFamily: "SF-Pro-Display" }}
         >
           <div className="flex flex-col items-center gap-4">
-            <div
-              className="text-6xl font-bold text-white"
+            <TextShimmerWave
+              className="text-6xl font-bold pointer-events-none select-none"
+              duration={3}
             >
               From seconds to sensations.
-            </div>
+            </TextShimmerWave>
             <ShinyText
               text="Short - Sharp - Shareable"
-              className="font-thin"
+              className="font-thin pointer-events-none select-none"
               disabled={false}
               speed={3}
             />
+            <div className="flex w-screen overflow-x-hidden -mt-48">
+              <BoxChat />
+            </div>
           </div>
         </div>
-      }
+      </div>
     </div>
   );
 }
