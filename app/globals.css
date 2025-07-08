@@ -41,6 +41,24 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-shine: shine 5s linear infinite;
+
+  @keyframes shine {
+    0% {
+      background-position: 100%;
+    }
+    100% {
+      background-position: -100%;
+    }
+  }
+  @keyframes shine {
+  0% {
+    background-position: 100%;
+    }
+  100% {
+    background-position: -100%;
+    }
+  }
 }
 
 :root {
@@ -112,8 +130,12 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-
-
+@font-face {
+  font-family: 'FTV';
+  src: url('/assets/fonts/1FTV-The-Bold-Font.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -122,3 +144,44 @@
     @apply bg-background text-foreground;
   }
 }
+/* Start Generation Here */
+/* Start of Selection */
+@font-face {
+  font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Thin.otf') format('otf');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Light.otf') format('otf');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Regular.otf') format('otf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Medium.otf') format('otf');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF-Pro-Display';
+  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Bold.otf') format('otf');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* End of Selection */
