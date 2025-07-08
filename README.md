@@ -1,6 +1,7 @@
 <div align="center">
   
-![design](https://github.com/user-attachments/assets/1ce7a2ee-8584-4871-9b57-5a6991de0e10)
+![image](https://github.com/user-attachments/assets/6827e777-1014-4399-b6be-a3ff06eda746)
+
 Clippy
 </div>
 
