@@ -19,9 +19,9 @@ export function BackGround({
   className,
 }: SquaresProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const requestRef = useRef<number>();
-  const numSquaresX = useRef<number>();
-  const numSquaresY = useRef<number>();
+  const requestRef = useRef<number>(0);
+  const numSquaresX = useRef<number>(0);
+  const numSquaresY = useRef<number>(0);
   const gridOffset = useRef({ x: 0, y: 0 });
   const [hoveredSquare, setHoveredSquare] = useState<{
     x: number;
@@ -172,9 +172,9 @@ export function BackGround({
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`w-full h-full border-none block ${className}`}
-    />
+      <canvas
+        ref={canvasRef}
+        className={`w-full h-full border-none block ${className}`}
+      />
   );
 }

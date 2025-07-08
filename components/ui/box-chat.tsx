@@ -296,13 +296,9 @@ export function BoxChat() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col w-full items-center justify-center bg-transparent text-white p-6 relative overflow-hidden">
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse delay-700" />
-        <div className="absolute top-1/4 right-1/3 w-64 h-64 bg-fuchsia-500/10 rounded-full mix-blend-normal filter blur-[96px] animate-pulse delay-1000" />
-      </div>
-      <div className="w-full max-w-2xl mx-auto relative">
+    <div className="flex flex-col w-full items-center justify-center bg-transparent text-white p-6 relative overflow-hidden select-none">
+
+      <div className=" max-w-2xl mx-auto relative">
         <motion.div
           className="relative z-10 space-y-12"
           initial={{ opacity: 0, y: 20 }}
@@ -372,16 +368,15 @@ export function BoxChat() {
                   "px-4 py-2 rounded-lg text-sm font-medium transition-all h-10",
                   "flex items-center gap-2",
                   value.trim()
-                    ? "bg-white text-[#0A0A0B] shadow-lg shadow-white/10"
+                    ? "bg-white text-[#0A0A0B] shadow-lg shadow-white/10 cursor-pointer"
                     : "bg-white/[0.05] text-white/40"
                 )}
               >
                 {isTyping ? (
                   <LoaderIcon className="w-4 h-4 animate-[spin_2s_linear_infinite]" />
                 ) : (
-                  <SendIcon className="w-4 h-4" />
+                  <SendIcon className="w-3 h-3" />
                 )}
-                <span>Send</span>
               </motion.button>
             </div>
 
@@ -396,15 +391,30 @@ export function BoxChat() {
                     Quality:
                   </label>
                   <Select>
-                    <SelectTrigger className="w-full bg-white/[0.05] border-none text-white/90 text-sm rounded-lg px-3 py-2 focus:ring-0 focus:outline-none">
+                    <SelectTrigger className="w-full bg-white/[0.05] border-none text-white/90 text-sm rounded-lg px-3 py-2 focus:ring-0 focus:outline-none cursor-pointer">
                       <SelectValue placeholder="Select quality" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#18181b] border-none text-white/90">
-                      <SelectItem value="720p">
-                        720p - Standard (free)
+                      <SelectItem value="480p" className="cursor-pointer">
+                        720p - HD (FREE)
                       </SelectItem>
-                      <SelectItem value="1080p">1080p - HD (pro)</SelectItem>
-                      <SelectItem value="480p">480p - SD (free)</SelectItem>
+                      <SelectItem value="1080p" className="cursor-pointer">
+                        1080p - FHD (FREE)
+                      </SelectItem>
+                      <SelectItem
+                        value="720p"
+                        className="cursor-pointer text-amber-400"
+                        disabled
+                      >
+                        2k - QHD (PRO)
+                      </SelectItem>
+                      <SelectItem
+                        value="720p"
+                        className="cursor-pointer text-amber-400"
+                        disabled
+                      >
+                        4k - UHD (PRO)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -420,7 +430,7 @@ export function BoxChat() {
                       Audio:
                     </label>
                     <div className="flex items-center gap-2">
-                      <Switch id="audio-switch" />
+                      <Switch id="audio-switch" className="cursor-pointer" />
                       <span className="text-sm text-white/80">
                         Export audio (.mp3)
                       </span>
@@ -428,7 +438,7 @@ export function BoxChat() {
                   </div>
 
                   {/* Subtitles Switch */}
-                  <div className="flex flex-col gap-1 items-start min-w-[120px]">
+                  <div className="flex flex-col gap-1 items-start pr-4">
                     <label
                       className="text-xs text-white/60 mb-1"
                       htmlFor="subtitles-switch"
@@ -436,7 +446,7 @@ export function BoxChat() {
                       Subtitles:
                     </label>
                     <div className="flex items-center gap-2">
-                      <Switch id="subtitles-switch" />
+                      <Switch id="subtitles-switch" className="cursor-pointer"/>
                       <span className="text-sm text-white/80">
                         English (.srt)
                       </span>
@@ -466,19 +476,17 @@ export function BoxChat() {
       <AnimatePresence>
         {isTyping && (
           <motion.div
-            className="fixed bottom-8 mx-auto transform -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05]"
+            className="fixed left-1/2 bottom-8 -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05] z-50"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-7 rounded-full bg-white/[0.05] flex items-center justify-center text-center">
-                <span className="text-xs font-medium text-white/90 mb-0.5">
-                  zap
-                </span>
+              <div className="rounded-full bg-white/[0.05] flex items-center justify-center text-center">
+                <i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/70">
-                <span>Thinking</span>
+                <span>Processing...</span>
                 <TypingDots />
               </div>
             </div>
