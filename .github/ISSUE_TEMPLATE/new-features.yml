@@ -10,7 +10,7 @@ body:
     id: description
     attributes:
       label: Describe the feature
-      placeholder: A button in the screen X that allows to do Y
+      placeholder: A feature X that allows to do Y
     validations:
       required: true
   - type: textarea

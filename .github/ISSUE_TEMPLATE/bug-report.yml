@@ -32,6 +32,13 @@ body:
     id: screenshots
     attributes:
       label: Put here any screenshots or videos (optional)
+  - type: textarea
+    id: deviceinfo
+    attributes:
+      label: Your OS and Browser (optional)
+      placeholder: |
+        - OS: Windows 10
+        - Browser: Chrome 90.0
   - type: dropdown
     id: assign
     attributes:
