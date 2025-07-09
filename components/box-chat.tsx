@@ -468,7 +468,10 @@ export function BoxChat() {
               transition={{ delay: 0.3 }}
             >
               Support youtube links from youtube.com and youtu.be.{" "}
-              <a href="" className="underline cursor-pointer hover:text-white/60 transition-colors">
+              <a
+                href="https://github.com/verse91/clippy-ytb/issues/new?template=bug-report.yml"
+                className="underline cursor-pointer hover:text-white/60 transition-colors"
+              >
                 Report bugs?
               </a>
             </motion.p>
