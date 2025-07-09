@@ -448,7 +448,7 @@ export function BoxChat() {
                     <div className="flex items-center gap-2">
                       <Switch id="subtitles-switch" className="cursor-pointer"/>
                       <span className="text-sm text-white/80">
-                        English (.srt)
+                        Export subtitles (.srt)
                       </span>
                     </div>
                   </div>

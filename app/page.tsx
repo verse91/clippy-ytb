@@ -1,8 +1,8 @@
-import { BackGround } from "@/components/ui/squares-background";
+import { BackGround } from "@/components/squares-background";
 import ShinyText from "@/components/ui/texts/shiny-text";
 import { TextShimmerWave } from "@/components/ui/texts/text-wave";
-import Navbar from "@/components/ui/navbar";
-import { BoxChat } from "@/components/ui/box-chat";
+import Navbar from "@/components/navbar";
+import { BoxChat } from "@/components/box-chat";
 
 export default function Home() {
   return (

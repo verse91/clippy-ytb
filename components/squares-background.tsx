@@ -11,7 +11,7 @@ interface SquaresProps {
 }
 
 export function BackGround({
-  direction = "right",
+  direction = "diagonal",
   speed = 1,
   borderColor = "#333",
   squareSize = 40,

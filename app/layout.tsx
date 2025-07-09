@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Clippy",
+  title: "Clippy - Turn moments into clips",
   description: "Make viral clips with Clippy",
 };
 
