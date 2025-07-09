@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,13 +44,6 @@ export default function SignInModal({ trigger }: SignInModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        <DialogClose asChild>
-            <i
-              className="bxr  bxs-backspace absolute top-7 right-6 transition-all hover:scale-105 text-3xl cursor-pointer"
-              style={{ color: "#ffffff" }}
-              title="ESC"
-            ></i>
-        </DialogClose>
         <div className="flex flex-col gap-2">
           <DialogTitle className="text-2xl font-semibold">Login</DialogTitle>
           {/* Terms and Conditions scroll area */}
