@@ -30,15 +30,26 @@ export default function Navbar() {
             title="Star it on GitHub ⭐"
             className="transition-colors group"
           >
-            <i
-              className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-110"
-            ></i>
+            <i className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
           </a>
           <SignInModal
             trigger={
-              <button className="p-3 cursor-pointer">
-                <i className="bx bxs-user text-3xl text-white hover:text-gray-300 transition-all hover:scale-110"></i>
-              </button>
+              <Button
+                className="hidden sm:inline-flex hover:scale-105 cursor-pointer rounded-xl w-24"
+                variant="default"
+                size="lg"
+                title="Login"
+              >
+                <i
+                  className="bx bxs-arrow-in-right-square-half text-3xl text-black transition-all"
+                ></i>
+                <p
+                  className="font-bold"
+                  style={{ fontFamily: "SF-Pro-Display" }}
+                >
+                  Login
+                </p>
+              </Button>
             }
           />
         </div>

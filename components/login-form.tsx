@@ -47,13 +47,13 @@ export default function SignInModal({ trigger }: SignInModalProps) {
       <DialogContent className="sm:max-w-md">
         <DialogClose asChild>
             <i
-              className="bxr  bxs-backspace absolute top-7 right-6 transition-transform hover:scale-105 text-3xl cursor-pointer"
+              className="bxr  bxs-backspace absolute top-7 right-6 transition-all hover:scale-105 text-3xl cursor-pointer"
               style={{ color: "#ffffff" }}
               title="ESC"
             ></i>
         </DialogClose>
         <div className="flex flex-col gap-2">
-          <DialogTitle className="text-2xl font-semibold">Sign In</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Login</DialogTitle>
           {/* Terms and Conditions scroll area */}
           <ScrollArea className="h-48 border rounded-md p-3 bg-muted/30 my-2">
             <div className="space-y-4 text-sm text-muted-foreground">
