@@ -468,9 +468,9 @@ export function BoxChat() {
               transition={{ delay: 0.3 }}
             >
               Support youtube links from youtube.com and youtu.be.{" "}
-              <span className="underline cursor-pointer hover:text-white/60 transition-colors">
+              <a href="" className="underline cursor-pointer hover:text-white/60 transition-colors">
                 Report bugs?
-              </span>
+              </a>
             </motion.p>
           </div>
         </motion.div>
