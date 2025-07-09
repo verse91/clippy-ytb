@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-// import { signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabaseClients";
 import {
   Dialog,
   DialogContent,
@@ -12,40 +12,33 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TERMS_TEXT } from "@/lib/terms";
 
 interface SignInModalProps {
   trigger?: React.ReactNode;
 }
-
-import { TERMS_TEXT } from "@/lib/terms";
 
 export default function SignInModal({ trigger }: SignInModalProps) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
-  //   const handleSignIn = async () => {
-  //     await signIn.social(
-  //       {
-  //         provider: "google",
-  //         callbackURL: "/",
-  //       },
-  //       {
-  //         onRequest: () => setLoading(true),
-  //         onResponse: () => {
-  //           setLoading(false);
-  //           setOpen(false);
-  //         },
-  //       }
-  //     );
-  //   };
+  const handleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      console.error("Login error:", error.message);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <div className="flex flex-col gap-2">
-          <DialogTitle className="text-2xl font-semibold">Login</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Sign In</DialogTitle>
           {/* Terms and Conditions scroll area */}
           <ScrollArea className="h-48 border rounded-md p-3 bg-muted/30 my-2">
             <div className="space-y-4 text-sm text-muted-foreground">
@@ -89,7 +82,7 @@ export default function SignInModal({ trigger }: SignInModalProps) {
             size="lg"
             className={cn("w-full gap-2 cursor-pointer")}
             disabled={loading || !accepted}
-            // onClick={handleSignIn}
+            onClick={handleSignIn}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
