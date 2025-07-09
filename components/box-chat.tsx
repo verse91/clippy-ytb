@@ -21,6 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
 import { Switch } from "@/components/ui/switch";
+import NotiPopup from "./ui/noti-popup";
 import {
   Select,
   SelectContent,
@@ -297,7 +298,6 @@ export function BoxChat() {
 
   return (
     <div className="flex flex-col w-full items-center justify-center bg-transparent text-white p-6 relative overflow-hidden select-none">
-
       <div className=" max-w-2xl mx-auto relative">
         <motion.div
           className="relative z-10 space-y-12"
@@ -446,7 +446,10 @@ export function BoxChat() {
                       Subtitles:
                     </label>
                     <div className="flex items-center gap-2">
-                      <Switch id="subtitles-switch" className="cursor-pointer"/>
+                      <Switch
+                        id="subtitles-switch"
+                        className="cursor-pointer"
+                      />
                       <span className="text-sm text-white/80">
                         Export subtitles (.srt)
                       </span>
@@ -473,26 +476,30 @@ export function BoxChat() {
         </motion.div>
       </div>
 
-      <AnimatePresence>
-        {isTyping && (
-          <motion.div
-            className="fixed left-1/2 bottom-8 -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05] z-50"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-white/[0.05] flex items-center justify-center text-center">
-                <i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <span>Processing...</span>
-                <TypingDots />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isTyping ? (
+        <NotiPopup
+          isVisible={isTyping}
+          icon={<i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>}
+          text={
+            value.startsWith("https://youtube.com") ||
+            value.startsWith("https://www.youtube.com") ||
+            value.startsWith("https://youtu.be") ||
+            value.startsWith("www.youtube.com") ||
+            value.startsWith("youtu.be") ||
+            value.startsWith("youtube.com")
+              ? "Processing"
+              : "This is not a Youtube video link"
+          }
+          showTypingDots={
+            value.startsWith("https://youtube.com") ||
+            value.startsWith("https://www.youtube.com") ||
+            value.startsWith("https://youtu.be") ||
+            value.startsWith("www.youtube.com") ||
+            value.startsWith("youtu.be") ||
+            value.startsWith("youtube.com")
+          }
+        />
+      ) : null}
 
       {inputFocused && (
         <motion.div
@@ -509,33 +516,6 @@ export function BoxChat() {
           }}
         />
       )}
-    </div>
-  );
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center ml-1">
-      {[1, 2, 3].map((dot) => (
-        <motion.div
-          key={dot}
-          className="w-1.5 h-1.5 bg-white/90 rounded-full mx-0.5"
-          initial={{ opacity: 0.3 }}
-          animate={{
-            opacity: [0.3, 0.9, 0.3],
-            scale: [0.85, 1.1, 0.85],
-          }}
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            delay: dot * 0.15,
-            ease: "easeInOut",
-          }}
-          style={{
-            boxShadow: "0 0 4px rgba(255, 255, 255, 0.3)",
-          }}
-        />
-      ))}
     </div>
   );
 }

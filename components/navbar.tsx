@@ -31,13 +31,13 @@ export default function Navbar() {
             className="transition-colors group"
           >
             <i
-              className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-105"
+              className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-110"
             ></i>
           </a>
           <SignInModal
             trigger={
               <button className="p-3 cursor-pointer">
-                <i className="bx bxs-user text-3xl text-white hover:text-gray-300 transition-all hover:scale-105"></i>
+                <i className="bx bxs-user text-3xl text-white hover:text-gray-300 transition-all hover:scale-110"></i>
               </button>
             }
           />

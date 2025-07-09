@@ -49,6 +49,7 @@ export default function SignInModal({ trigger }: SignInModalProps) {
             <i
               className="bxr  bxs-backspace absolute top-7 right-6 transition-transform hover:scale-105 text-3xl cursor-pointer"
               style={{ color: "#ffffff" }}
+              title="ESC"
             ></i>
         </DialogClose>
         <div className="flex flex-col gap-2">
