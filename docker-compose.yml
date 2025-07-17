@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  b: # backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      tags:
+        - ytb-clipy-backend
+    image: ytb-clipy-backend
+    ports:
+      - "${BACKEND_PORT}:8080"
+    env_file:
+      - ./.env
+
+  f: # frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - ytb-clipy-frontend
+    image: ytb-clipy-frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    env_file:
+      - ./.env
