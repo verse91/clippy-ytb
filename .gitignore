@@ -1,4 +1,64 @@
-# ─── Frontend (Node.js / Next.js) ─────────────────────────────
+# ================== Dependencies ==================
+node_modules/
+.yarn/*
+.pnp*
+.pnpm-debug.log*
+
+# Keep necessary Yarn folders
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ================== Build & Production ==================
+.build/
+dist/
+out/
+.next/
+.vercel/
+.turbo/
+.output/
+
+# ================== Testing & Coverage ==================
+coverage/
+*.test.js
+*.test.ts
+
+# ================== Env files ==================
+.env*
+**/.env*
+!.env.example
+!.env.local.example
+!frontend/.env.example
+!backend/.env.example
+
+# ================== Logs & Cache ==================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.cache/
+*.tsbuildinfo
+
+# ================== Editor / IDE ==================
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# ================== System ==================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+
+# ================== Docker ==================
+**/docker-compose.override.yml
+**/docker-compose.local.yml
+
+# ================== Frontend (Next.js) ==================
 frontend/node_modules/
 frontend/.next/
 frontend/out/
@@ -9,9 +69,8 @@ frontend/yarn.lock
 frontend/pnpm-lock.yaml
 frontend/npm-debug.log*
 frontend/yarn-*.log
-frontend/.DS_Store
 
-# ─── Backend (Go) ─────────────────────────────────────────────
+# ================== Backend (Go) ==================
 backend/bin/
 backend/pkg/
 backend/tmp/
@@ -22,33 +81,3 @@ backend/*.test
 backend/go.sum
 backend/go.work*
 backend/.DS_Store
-
-# ─── General ──────────────────────────────────────────────────
-*.log
-*.pem
-*.tsbuildinfo
-.DS_Store
-*.local
-*.envrc
-
-# ─── Docker override files ───────────────────────────────────
-**/docker-compose.override.yml
-**/docker-compose.local.yml
-
-# ─── System / Editor files ───────────────────────────────────
-Thumbs.db
-ehthumbs.db
-*.swp
-*.swo
-.vscode/
-.idea/
-*.sublime-*
-
-# ─── Build artifacts ─────────────────────────────────────────
-/build
-/dist
-/coverage
-
-# ─── Allow example env files ─────────────────────────────────
-!frontend/.env.example
-!backend/.env.example
