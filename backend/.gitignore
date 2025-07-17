@@ -1,7 +1,0 @@
-.env
-!.env.example
-tmp/build-errors.log
-cmd/server/tmp/main.exe
-
-log
-.gitignore

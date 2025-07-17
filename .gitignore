@@ -1,0 +1,54 @@
+# ─── Frontend (Node.js / Next.js) ─────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*
+frontend/.pnp
+frontend/.vercel
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+frontend/npm-debug.log*
+frontend/yarn-*.log
+frontend/.DS_Store
+
+# ─── Backend (Go) ─────────────────────────────────────────────
+backend/bin/
+backend/pkg/
+backend/tmp/
+backend/.env*
+backend/log/
+backend/coverage/
+backend/*.test
+backend/go.sum
+backend/go.work*
+backend/.DS_Store
+
+# ─── General ──────────────────────────────────────────────────
+*.log
+*.pem
+*.tsbuildinfo
+.DS_Store
+*.local
+*.envrc
+
+# ─── Docker override files ───────────────────────────────────
+**/docker-compose.override.yml
+**/docker-compose.local.yml
+
+# ─── System / Editor files ───────────────────────────────────
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.sublime-*
+
+# ─── Build artifacts ─────────────────────────────────────────
+/build
+/dist
+/coverage
+
+# ─── Allow example env files ─────────────────────────────────
+!frontend/.env.example
+!backend/.env.example
