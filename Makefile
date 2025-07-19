@@ -26,3 +26,9 @@ b: #backend
 
 f: #frontend
 	@cd frontend && bun run dev
+run:
+	@$(MAKE) -j2 b f
+
+stop:
+	@pkill -f "go run" || true
+	@pkill -f "bun run dev" || true

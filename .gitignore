@@ -72,7 +72,7 @@ frontend/yarn-*.log
 
 # ================== Backend (Go) ==================
 backend/bin/
-backend/pkg/
+# backend/pkg/
 backend/tmp/
 backend/.env*
 backend/log/
