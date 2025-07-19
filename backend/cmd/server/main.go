@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v3"
@@ -10,6 +11,7 @@ import (
 	// "fmt"
 	// "github.com/goccy/go-json"
 	router "github.com/verse91/ytb-clipy/backend/internal/routes"
+	"github.com/verse91/ytb-clipy/backend/migrations"
 )
 
 // type RedirectConfig struct {
@@ -18,7 +20,14 @@ import (
 // }
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	err = migrations.AutoMigrate()
+	if err != nil {
+		log.Fatalf("Migration failed: %v", err)
+	}
 	app := fiber.New()
 
 	v1 := app.Group("/api/v1")

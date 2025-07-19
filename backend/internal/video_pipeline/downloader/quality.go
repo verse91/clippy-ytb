@@ -1,4 +1,4 @@
-package downloader  
+package downloader
 
 import (
 	"fmt"
@@ -10,7 +10,9 @@ import (
     "regexp"
 )
 
-func FHD(videoURL string) {
+
+
+func FHD(videoURL string) error {
     start := time.Now()
 
     // yt-dlp \
@@ -32,7 +34,7 @@ func FHD(videoURL string) {
 
     if err := cmd_1080p.Run(); err != nil {
         fmt.Println("Fail:", err)
-        return
+        return nil
     }
 
     // Combine both stdout and stderr for scanning, since yt-dlp may print to either
@@ -65,6 +67,7 @@ func FHD(videoURL string) {
         fmt.Println("♻️ Video is already downloaded.")
     }
     fmt.Println("Took:", time.Since(start))
+    return nil
 }
 
 func HD(videoURL string) {
