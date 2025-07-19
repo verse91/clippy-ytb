@@ -40,7 +40,7 @@ func (vs *VideoService) validateURL(videoURL string) (string, error) {
 }
 
 func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
-	validateURL, err := vs.validateURL(videoURL)
+	validatedURL, err := vs.validateURL(videoURL)
 	if err != nil {
 		return "", fmt.Errorf("invalid video URL: %w", err)
 	}
@@ -48,13 +48,13 @@ func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
 	id := uuid.New().String()
 
 	// Store the download request in repository
-	if err := vs.VideoRepo.CreateDownloadRequest(id, validateURL); err != nil {
+	if err := vs.VideoRepo.CreateDownloadRequest(id, validatedURL); err != nil {
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}
 
 	// Start async download
 	go func() {
-		if err := downloader.FHD(videoURL); err != nil {
+		if err := downloader.FHD(validatedURL); err != nil {
 			// Update status in repository
 			vs.VideoRepo.UpdateDownloadStatus(id, "failed", err.Error())
 			return

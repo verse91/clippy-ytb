@@ -2,16 +2,17 @@ package router
 
 import (
 	c "github.com/verse91/ytb-clipy/backend/internal/controller"
+	"github.com/verse91/ytb-clipy/backend/internal/repo"
 
 	"github.com/gofiber/fiber/v3"
 )
 
 // SetupRoutes configures all API routes
-func SetupRoutes(router fiber.Router) {
+func SetupRoutes(router fiber.Router, videoRepo *repo.VideoRepo) {
 	router.Get("/", homepageHandler)
 	router.Get("/stack", c.NewStackController().StackHandler)
-	// router.Post("/video", c.NewVideoController().VideoProcessHandler)
-	router.Get("/video/download", c.NewVideoController().DownloadHandler)
+	// router.Post("/video", c.NewVideoController(videoRepo).VideoProcessHandler)
+	router.Get("/video/download", c.NewVideoController(videoRepo).DownloadHandler)
 	router.Get("/userinfo/", c.NewUserController().GetUserById).Name("user")
 	router.Get("/user/", c.NewUserController().UserHandler).Name("user") // /?name=...&id=...&age=...
 }
