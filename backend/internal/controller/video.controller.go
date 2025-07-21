@@ -8,6 +8,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
+	"github.com/supabase-community/supabase-go"
 )
 
 type VideoController struct {
@@ -18,7 +19,8 @@ type VideoRequest struct {
 	URL string `json:"url" binding:"required"`
 }
 
-func NewVideoController(videoRepo *repo.VideoRepo) *VideoController {
+func NewVideoController(supabaseClient *supabase.Client) *VideoController {
+	videoRepo := repo.NewVideoRepo(supabaseClient)
 	return &VideoController{
 		VideoService: service.NewVideoService(videoRepo),
 	}
