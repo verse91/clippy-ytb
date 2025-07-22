@@ -81,3 +81,4 @@ backend/*.test
 backend/go.sum
 backend/go.work*
 backend/.DS_Store
+backend/internal/video_pipeline/videos

@@ -1,4 +1,4 @@
-.PHONY: docker-b docker-f docker-up docker-down docker-rb docker-rf run-b run-f
+.PHONY: docker-b docker-f docker-up docker-down docker-rb docker-rf run
 
 # d = docker
 # Windows users must run docker desktop before running these commands
@@ -30,5 +30,5 @@ run:
 	@$(MAKE) -j2 b f
 
 stop:
-	@pkill -f "go run" || true
-	@pkill -f "bun run dev" || true
+	@xargs kill < .dev.pids 2>/dev/null || true
+	@rm -f .dev.pids
