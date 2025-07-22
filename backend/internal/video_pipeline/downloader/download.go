@@ -4,26 +4,26 @@ import (
 	// "fmt"
 	"os"
 	"path/filepath"
-    "runtime"
+	"runtime"
 )
 
 var (
-    ytDlpPath = getExecutablePath("yt-dlp")
-    outputDir = getConfigValue("OUTPUT_DIR", "videos")
+	ytDlpPath = getExecutablePath("yt-dlp")
+	outputDir = getConfigValue("OUTPUT_DIR", "internal/video_pipeline/videos")
 )
 
 func getExecutablePath(name string) string {
-    if runtime.GOOS == "windows" {
-        return filepath.Join("bin", name+".exe")
-    }
-    return filepath.Join("bin", name)
+	if runtime.GOOS == "windows" {
+		return filepath.Join("internal", "video_pipeline", "bin", name+".exe")
+	}
+	return filepath.Join("internal", "video_pipeline", "bin", name)
 }
 
 func getConfigValue(key, defaultValue string) string {
-    if value := os.Getenv(key); value != "" {
-        return value
-    }
-    return defaultValue
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 // func download() {

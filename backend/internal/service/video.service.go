@@ -45,10 +45,13 @@ func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
 		return "", fmt.Errorf("invalid video URL: %w", err)
 	}
 
-	id := uuid.New().String()
+	// Generate a temporary ID for tracking - the database will generate the real UUID
+	tempID := uuid.New().String()
 
 	// Store the download request in repository
-	if err := vs.VideoRepo.CreateDownloadRequest(id, validatedURL); err != nil {
+	if err := vs.VideoRepo.CreateDownloadRequest(tempID, validatedURL); err != nil {
+		// In ra lỗi chi tiết
+		fmt.Printf("DownloadVideo - CreateDownloadRequest error: %v\n", err)
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}
 
@@ -56,13 +59,13 @@ func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
 	go func() {
 		if err := downloader.FHD(validatedURL); err != nil {
 			// Update status in repository
-			vs.VideoRepo.UpdateDownloadStatus(id, "failed", err.Error())
+			vs.VideoRepo.UpdateDownloadStatus(tempID, "failed", err.Error())
 			return
 		}
-		vs.VideoRepo.UpdateDownloadStatus(id, "completed", "")
+		vs.VideoRepo.UpdateDownloadStatus(tempID, "completed", "")
 	}()
 
-	return id, nil
+	return tempID, nil
 }
 
 func (vs *VideoService) GetDownloadStatus(downloadID string) (string, error) {

@@ -18,20 +18,29 @@ func NewVideoRepo(supaClient *supabase.Client) *VideoRepo {
 	}
 }
 
-// Tạo bản ghi download mới
 func (vr *VideoRepo) CreateDownloadRequest(id, videoURL string) error {
 	data := map[string]interface{}{
-		"id":     id,
 		"url":    videoURL,
 		"status": "processing",
 	}
-	_, _, err := vr.client.From("downloads").Insert(data, false, "", "", "").Execute()
+
+	// Debug logging
+	fmt.Printf("Inserting data: %+v\n", data)
+
+	result, count, err := vr.client.From("downloads").Insert(data, false, "", "", "").Execute()
 	if err != nil {
+		// Detailed error logging
+		// fmt.Printf("CreateDownloadRequest detailed error: %+v\n", err)
+		// fmt.Printf("Error type: %T\n", err)
+		// fmt.Printf("Error string: %s\n", err.Error())
+
 		if strings.Contains(err.Error(), "duplicate key") {
 			return fmt.Errorf("download already exists")
 		}
-		return fmt.Errorf("insert error: %w", err)
+		return fmt.Errorf("insert error: %s", err.Error())
 	}
+
+	fmt.Printf("Insert successful - Result: %s, Count: %d\n", string(result), count)
 	return nil
 }
 

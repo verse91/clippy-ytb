@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"github.com/verse91/ytb-clipy/backend/internal/errors"
+	"fmt"
+
 	"github.com/verse91/ytb-clipy/backend/internal/repo"
 	"github.com/verse91/ytb-clipy/backend/internal/service"
 	"github.com/verse91/ytb-clipy/backend/pkg/response"
@@ -29,17 +30,29 @@ func NewVideoController(supabaseClient *supabase.Client) *VideoController {
 func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 	var req VideoRequest
 
+	// Debug logging
+	// fmt.Printf("Request method: %s\n", c.Method())
+	// fmt.Printf("Request path: %s\n", c.Path())
+	// fmt.Printf("Request headers: %+v\n", c.GetReqHeaders())
+	// fmt.Printf("Raw request body: %s\n", string(c.Body()))
+
+
 	if err := c.Bind().JSON(&req); err != nil {
-		return response.ErrorResponse(c, errors.ErrInvalidRequestBody, "Invalid request body")
+		fmt.Printf("JSON bind error: %v\n", err)
+		return response.ErrorResponse(c, response.ErrInvalidRequestBody, fmt.Sprintf("Invalid request body: %v", err))
 	}
 
+	fmt.Printf("Parsed request: %+v\n", req)
+
 	if req.URL == "" {
-		return response.ErrorResponse(c, errors.ErrURLRequired, "URL is required")
+		fmt.Printf("URL is empty after parsing\n")
+		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
 	}
 
 	downloadID, err := vc.VideoService.DownloadVideo(req.URL)
 	if err != nil {
-		return response.ErrorResponse(c, errors.ErrDownloadStartFailed, "Failed to start download: "+err.Error())
+		fmt.Printf("DownloadHandler error: %v\n", err)
+		return response.ErrorResponse(c, response.ErrDownloadStartFailed, "Failed to start download: "+err.Error())
 	}
 
 	data := fiber.Map{
@@ -50,7 +63,7 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 
 	prettyJSON, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		return response.ErrorResponse(c, errors.ErrSerializeResponse, "Failed to serialize response")
+		return response.ErrorResponse(c, response.ErrSerializeResponse, "Failed to serialize response")
 	}
 
 	return c.Status(fiber.StatusOK).Send(prettyJSON)
@@ -60,12 +73,12 @@ func (vc *VideoController) GetDownloadStatus(c fiber.Ctx) error {
 	downloadID := c.Params("id")
 
 	if downloadID == "" {
-		return response.ErrorResponse(c, errors.ErrDownloadIDRequired, "Download ID is required")
+		return response.ErrorResponse(c, response.ErrDownloadIDRequired, "Download ID is required")
 	}
 
 	status, err := vc.VideoService.GetDownloadStatus(downloadID)
 	if err != nil {
-		return response.ErrorResponse(c, errors.ErrDownloadNotFound, "Download not found or failed to get status")
+		return response.ErrorResponse(c, response.ErrDownloadNotFound, "Download not found or failed to get status")
 	}
 
 	data := fiber.Map{
@@ -75,7 +88,7 @@ func (vc *VideoController) GetDownloadStatus(c fiber.Ctx) error {
 
 	prettyJSON, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		return response.ErrorResponse(c, errors.ErrSerializeStatus, "Failed to serialize response")
+		return response.ErrorResponse(c, response.ErrSerializeStatus, "Failed to serialize response")
 	}
 
 	return c.Status(fiber.StatusOK).Send(prettyJSON)

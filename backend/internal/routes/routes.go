@@ -11,7 +11,7 @@ import (
 func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client) {
 	router.Get("/", homepageHandler)
 	// router.Post("/video", c.NewVideoController(videoRepo).VideoProcessHandler)
-	router.Get("/video/download", c.NewVideoController(supabaseClient).DownloadHandler)
+	router.Post("/video/download", c.NewVideoController(supabaseClient).DownloadHandler)
 	router.Get("/userinfo/", c.NewUserController().GetUserById).Name("user")
 	router.Get("/user/", c.NewUserController().UserHandler).Name("user") // /?name=...&id=...&age=...
 }
