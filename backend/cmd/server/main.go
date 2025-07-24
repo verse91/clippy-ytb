@@ -8,12 +8,12 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/supabase-community/supabase-go"
 
-
 	// "log"
 	// "fmt"
 	// "github.com/goccy/go-json"
+	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 	router "github.com/verse91/ytb-clipy/backend/internal/routes"
-    "github.com/verse91/ytb-clipy/backend/pkg/logger"
+	"github.com/verse91/ytb-clipy/backend/pkg/logger"
 )
 
 // type RedirectConfig struct {
@@ -43,14 +43,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create Supabase client: %v", err)
 	}
-    logger.InitLogger()
+	logger.InitLogger()
 
 	app := fiber.New()
-
+	app.Use(middleware.RateLimitMiddleware)
 	v1 := app.Group("/api/v1")
 
 	// Setup all routes
 	router.SetupRoutes(v1, supaClient)
+	go middleware.CleanupClients()
 
 	if err := app.Listen(":" + os.Getenv("BACKEND_PORT")); err != nil {
 		panic(err)
