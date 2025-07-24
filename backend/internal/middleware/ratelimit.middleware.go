@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"context"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -17,8 +20,34 @@ type Client struct {
 	lastSeen time.Time
 }
 
-var clients = make(map[string]*Client)
-var mu sync.Mutex
+var (
+	clients = make(map[string]*Client)
+	mu      sync.Mutex
+
+	// Configurable rate limiter parameters
+	requestsPerSecond = getEnvAsFloat("RATE_LIMIT_RPS", 5)
+	burst             = getEnvAsInt("RATE_LIMIT_BURST", 10)
+	cleanupInterval   = getEnvAsInt("RATE_LIMIT_CLEANUP_INTERVAL", 60) // seconds
+	clientTTL         = getEnvAsInt("RATE_LIMIT_CLIENT_TTL", 180)      // seconds
+)
+
+func getEnvAsInt(name string, defaultVal int) int {
+	if valStr := os.Getenv(name); valStr != "" {
+		if val, err := strconv.Atoi(valStr); err == nil {
+			return val
+		}
+	}
+	return defaultVal
+}
+
+func getEnvAsFloat(name string, defaultVal float64) float64 {
+	if valStr := os.Getenv(name); valStr != "" {
+		if val, err := strconv.ParseFloat(valStr, 64); err == nil {
+			return val
+		}
+	}
+	return defaultVal
+}
 
 func getClientIP(c fiber.Ctx) string {
 	ip := c.Get("X-Forwarded-For")
@@ -36,7 +65,7 @@ func getLimiter(ip string) *rate.Limiter {
 	client, exists := clients[ip]
 
 	if !exists {
-		limiter := rate.NewLimiter(5, 10)
+		limiter := rate.NewLimiter(rate.Limit(requestsPerSecond), burst)
 		clients[ip] = &Client{limiter, time.Now()}
 		return limiter
 	}
@@ -44,16 +73,20 @@ func getLimiter(ip string) *rate.Limiter {
 	return client.limiter
 }
 
-func CleanupClients() {
+func CleanupClients(ctx context.Context) {
 	for {
-		time.Sleep(time.Minute)
-		mu.Lock()
-		for ip, client := range clients {
-			if time.Since(client.lastSeen) > time.Minute*3 {
-				delete(clients, ip)
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(time.Duration(cleanupInterval) * time.Second):
+			mu.Lock()
+			for ip, client := range clients {
+				if time.Since(client.lastSeen) > time.Duration(clientTTL)*time.Second {
+					delete(clients, ip)
+				}
 			}
+			mu.Unlock()
 		}
-		mu.Unlock()
 	}
 }
 

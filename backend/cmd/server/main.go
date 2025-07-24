@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -51,9 +52,15 @@ func main() {
 
 	// Setup all routes
 	router.SetupRoutes(v1, supaClient)
-	go middleware.CleanupClients()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go middleware.CleanupClients(ctx)
 
 	if err := app.Listen(":" + os.Getenv("BACKEND_PORT")); err != nil {
+		cancel()
 		panic(err)
 	}
+	// Optionally wait for cleanup goroutine to finish if needed
 }
