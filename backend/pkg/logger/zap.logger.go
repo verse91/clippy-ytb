@@ -56,7 +56,7 @@ func getWriterSync() zapcore.WriteSyncer {
 		panic(err)
 	}
 
-	file, err := os.OpenFile("./log/log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	file, err := os.OpenFile("./log/info.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		panic(err) // Immediately stops program execution and prints the error message
 	}
