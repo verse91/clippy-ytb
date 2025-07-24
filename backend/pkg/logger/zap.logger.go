@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	// "go.uber.org/zap/zapcore"
+    "gopkg.in/natefinch/lumberjack.v2"
 )
 
 var Log *zap.Logger
@@ -56,11 +57,15 @@ func getWriterSync() zapcore.WriteSyncer {
 		panic(err)
 	}
 
-	file, err := os.OpenFile("./log/info.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		panic(err) // Immediately stops program execution and prints the error message
+	lumberjackLogger := &lumberjack.Logger{
+		Filename:   "./log/info.log",
+		MaxSize:    1, // megabytes
+		MaxBackups: 5,
+		MaxAge:     5,   //days
+		Compress:   true, // disabled by default
+        LocalTime: true,
 	}
-	syncfile := zapcore.AddSync(file)
+	syncfile := zapcore.AddSync(lumberjackLogger)
 	syncConsole := zapcore.AddSync(os.Stderr)
 	return zapcore.NewMultiWriteSyncer(syncConsole, syncfile)
 
