@@ -19,7 +19,6 @@ func FullVideoFHD(videoURL string) error {
 		"--no-playlist",
 		"-f", `bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best`,
 		"-S", "res:1080,+codec:avc1,+br",
-		"--download-section", "*",
 		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
 		videoURL,
 	)

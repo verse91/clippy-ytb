@@ -26,7 +26,7 @@ function TypingDots() {
           transition={{
             duration: 1,
             repeat: Infinity,
-            delay: i * 0.2,
+            delay: i * 0.1,
           }}
         />
       ))}

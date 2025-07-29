@@ -273,7 +273,7 @@ export function BoxChat() {
           setIsTyping(false);
           setValue("");
           adjustHeight(true);
-        }, 3000);
+        }, 2000);
       });
     }
   };
@@ -482,22 +482,31 @@ export function BoxChat() {
           isVisible={isTyping}
           icon={<i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>}
           text={
-            value.startsWith("https://youtube.com") ||
-            value.startsWith("https://www.youtube.com") ||
-            value.startsWith("https://youtu.be") ||
-            value.startsWith("www.youtube.com") ||
-            value.startsWith("youtu.be") ||
-            value.startsWith("youtube.com")
+            value.includes("list=") &&
+            (value.startsWith("https://youtube.com") ||
+              value.startsWith("https://www.youtube.com") ||
+              value.startsWith("https://youtu.be") ||
+              value.startsWith("www.youtube.com") ||
+              value.startsWith("youtu.be") ||
+              value.startsWith("youtube.com"))
+              ? "We do not support to download full playlist"
+              : value.startsWith("https://youtube.com") ||
+                value.startsWith("https://www.youtube.com") ||
+                value.startsWith("https://youtu.be") ||
+                value.startsWith("www.youtube.com") ||
+                value.startsWith("youtu.be") ||
+                value.startsWith("youtube.com")
               ? "Processing"
               : "This is not a Youtube video link"
           }
           showTypingDots={
-            value.startsWith("https://youtube.com") ||
-            value.startsWith("https://www.youtube.com") ||
-            value.startsWith("https://youtu.be") ||
-            value.startsWith("www.youtube.com") ||
-            value.startsWith("youtu.be") ||
-            value.startsWith("youtube.com")
+            !value.includes("list=") &&
+            (value.startsWith("https://youtube.com") ||
+              value.startsWith("https://www.youtube.com") ||
+              value.startsWith("https://youtu.be") ||
+              value.startsWith("www.youtube.com") ||
+              value.startsWith("youtu.be") ||
+              value.startsWith("youtube.com"))
           }
         />
       ) : null}
