@@ -13,15 +13,13 @@ import (
 func FullVideoFHD(videoURL string) error {
 	start := time.Now()
 
-	// yt-dlp \
-	// -f "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]" \
-	// -S "+vbr,+abr" \
-	// -o "<outputDir>/%(title)s (1080p, h264).%(ext)s" \
-	// "<videoURL>"
+	// make sure to check no playlist from user's input, video will download for the res <=1080p
 	cmd_1080p := exec.Command(
 		ytDlpPath,
-		"-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080][vcodec^=avc1]",
-		"-S", "+res,+vbr,+abr",
+		"--no-playlist",
+		"-f", `bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best`,
+		"-S", "res:1080,+codec:avc1,+br",
+		"--download-section", "*",
 		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
 		videoURL,
 	)

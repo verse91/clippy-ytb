@@ -20,17 +20,14 @@ func TimeRangeFHD(videoURL string) {
 	fmt.Scanf("%s\n", &end)
 	fmt.Println("Begin, end:", begin, end)
 
-	// yt-dlp \
-	// -f "bv[height=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]" \
-	// -S "+vbr,+abr" \
-	// -o "<outputDir>/%(title)s (1080p, h264).%(ext)s" \
-	// "<videoURL>"
+	// ../bin/yt-dlp.exe --no-playlist -f "bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best" -S "res:1080,+codec:avc1,+br" -o "%(title)s (%(height)sp, h264).%(ext)s" ""
 	cmd_1080p := exec.Command(
 		ytDlpPath,
-		"-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]",
-		"-S", "+vbr,+abr", // sort bitrate
+		"--no-playlist",
+		"-f", `bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best`,
+		"-S", "res:1080,+codec:avc1,+br",
 		"--download-section", fmt.Sprintf("*%s-%s", begin, end),
-		"-o", filepath.Join(outputDir, "%(title)s (1080p, h264).%(ext)s"),
+		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
 		videoURL,
 	)
 	var stdoutBuf bytes.Buffer
