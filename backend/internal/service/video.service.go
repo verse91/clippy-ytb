@@ -57,7 +57,7 @@ func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
 
 	// Start async download
 	go func() {
-		if err := downloader.FHD(validatedURL); err != nil {
+		if err := downloader.FullVideoFHD(validatedURL); err != nil {
 			// Update status in repository
 			vs.VideoRepo.UpdateDownloadStatus(tempID, "failed", err.Error())
 			return

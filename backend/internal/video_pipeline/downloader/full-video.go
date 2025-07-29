@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func FHD(videoURL string) error {
+func FullVideoFHD(videoURL string) error {
 	start := time.Now()
 
 	// yt-dlp \
