@@ -395,21 +395,18 @@ export function BoxChat() {
                       <SelectValue placeholder="Select quality" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#18181b] border-none text-white/90">
-                      <SelectItem value="480p" className="cursor-pointer">
-                        720p - HD (FREE)
-                      </SelectItem>
                       <SelectItem value="1080p" className="cursor-pointer">
-                        1080p - FHD (FREE)
+                        Best quality (Up to 1080p)
                       </SelectItem>
                       <SelectItem
-                        value="720p"
+                        value="2k"
                         className="cursor-pointer text-amber-400"
                         disabled
                       >
                         2k - QHD (PRO)
                       </SelectItem>
                       <SelectItem
-                        value="720p"
+                        value="4k"
                         className="cursor-pointer text-amber-400"
                         disabled
                       >
