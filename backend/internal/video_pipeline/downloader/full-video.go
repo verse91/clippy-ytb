@@ -14,15 +14,15 @@ func FullVideoFHD(videoURL string) error {
 	start := time.Now()
 
 	// yt-dlp \
-	// -f "bv[height=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]" \
+	// -f "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]" \
 	// -S "+vbr,+abr" \
 	// -o "<outputDir>/%(title)s (1080p, h264).%(ext)s" \
 	// "<videoURL>"
 	cmd_1080p := exec.Command(
 		ytDlpPath,
-		"-f", "bv[height=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]",
-		"-S", "+vbr,+abr", // sort bitrate
-		"-o", filepath.Join(outputDir, "%(title)s (1080p, h264).%(ext)s"),
+		"-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080][vcodec^=avc1]",
+		"-S", "+res,+vbr,+abr",
+		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
 		videoURL,
 	)
 	var stdoutBuf bytes.Buffer

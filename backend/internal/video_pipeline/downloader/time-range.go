@@ -27,7 +27,7 @@ func TimeRangeFHD(videoURL string) {
 	// "<videoURL>"
 	cmd_1080p := exec.Command(
 		ytDlpPath,
-		"-f", "bv[height=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]",
+		"-f", "bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv[height=1080][vcodec^=avc1]",
 		"-S", "+vbr,+abr", // sort bitrate
 		"--download-section", fmt.Sprintf("*%s-%s", begin, end),
 		"-o", filepath.Join(outputDir, "%(title)s (1080p, h264).%(ext)s"),
