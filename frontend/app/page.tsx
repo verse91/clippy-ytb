@@ -2,7 +2,7 @@ import { BackGround } from "@/components/squares-background";
 import ShinyText from "@/components/ui/texts/shiny-text";
 import { TextShimmerWave } from "@/components/ui/texts/text-wave";
 import Navbar from "@/components/navbar";
-import { BoxChat } from "@/components/box-chat";
+import { BoxChat } from "@/components/homepage/box-chat";
 
 export default function Home() {
   return (
@@ -31,6 +31,14 @@ export default function Home() {
                 disabled={false}
                 speed={3}
               />
+              {/* <iframe
+                className="rounded-xl shadow-[0_4px_32px_0_rgba(255,255,255,0.15)]"
+                width={896}
+                height={504}
+                src="https://www.youtube.com/embed/dy90tA3TT1c?autoplay=1"
+                allow="autoplay; fullscreen"
+                allowFullScreen
+              /> */}
               <div className="flex w-full max-w-4xl overflow-x-hidden px-4 sm:px-6 lg:px-8">
                 <BoxChat />
                 <div className="min-h-screen absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">

@@ -21,7 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
 import { Switch } from "@/components/ui/switch";
-import NotiPopup from "./ui/noti-popup";
+import NotiPopup from "../ui/noti-popup";
 import {
   Select,
   SelectContent,
@@ -154,6 +154,8 @@ export function BoxChat() {
   });
   const [inputFocused, setInputFocused] = useState(false);
   const commandPaletteRef = useRef<HTMLDivElement>(null);
+  const [selectedOption, setSelectedOption] = useState<string>("auto");
+  const [thumbnailEnabled, setThumbnailEnabled] = useState<boolean>(false);
 
   const commandSuggestions: CommandSuggestion[] = [
     {
@@ -383,37 +385,50 @@ export function BoxChat() {
             <div className="p-4 border-t border-white/[0.05] flex items-center justify-between gap-4 pl-8">
               <div className="flex flex-col gap-4 w-full">
                 {/* Quality Select */}
-                <div className="flex flex-col gap-1 max-w-[220px]">
-                  <label
-                    className="text-xs text-white/60 mb-1"
-                    htmlFor="quality-select"
-                  >
-                    Quality:
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full bg-white/[0.05] border-none text-white/90 text-sm rounded-lg px-3 py-2 focus:ring-0 focus:outline-none cursor-pointer">
-                      <SelectValue placeholder="Select quality" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#18181b] border-none text-white/90">
-                      <SelectItem value="1080p" className="cursor-pointer">
-                        Best quality (Up to 1080p)
-                      </SelectItem>
-                      <SelectItem
-                        value="2k"
-                        className="cursor-pointer text-amber-400"
-                        disabled
+                <div className="flex items-center gap-6 justify-start">
+                  <div className="flex flex-col gap-1 max-w-[220px]">
+                    <label
+                      className="text-xs text-white/60 mb-1"
+                      htmlFor="quality-select"
+                    >
+                      Option:
+                    </label>
+                    <Select
+                      value={selectedOption}
+                      onValueChange={(val) => {
+                        setSelectedOption(val);
+                        if (val === "audio-only" && thumbnailEnabled) {
+                          setThumbnailEnabled(false);
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        className="w-full bg-white/[0.05] border-none text-white/90 text-sm rounded-lg px-3 py-2 focus:ring-0 focus:outline-none cursor-pointer"
+                        style={{
+                          minWidth: 0,
+                          width: "100%",
+                          minHeight: 40,
+                          minInlineSize: "220px",
+                        }}
                       >
-                        2k - QHD (PRO)
-                      </SelectItem>
-                      <SelectItem
-                        value="4k"
-                        className="cursor-pointer text-amber-400"
-                        disabled
-                      >
-                        4k - UHD (PRO)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#18181b] border-none text-white/90">
+                        <SelectItem value="auto" className="cursor-pointer">
+                          Best quality (Up to 1080p)
+                        </SelectItem>
+                        <SelectItem
+                          value="audio-only"
+                          className="cursor-pointer"
+                        >
+                          Audio only
+                        </SelectItem>
+                        <SelectItem value="mute" className="cursor-pointer">
+                          Muted video
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Audio and Subtitles Switches */}
@@ -424,12 +439,12 @@ export function BoxChat() {
                       className="text-xs text-white/60 mb-1"
                       htmlFor="audio-switch"
                     >
-                      Audio:
+                      SponsorBlock:
                     </label>
                     <div className="flex items-center gap-2">
-                      <Switch id="audio-switch" className="cursor-pointer" />
+                      <Switch id="audio-switch" className="cursor-pointer" checked={true} />
                       <span className="text-sm text-white/80">
-                        Export audio (.mp3)
+                        Auto block sponsor
                       </span>
                     </div>
                   </div>
@@ -437,18 +452,33 @@ export function BoxChat() {
                   {/* Subtitles Switch */}
                   <div className="flex flex-col gap-1 items-start pr-4">
                     <label
-                      className="text-xs text-white/60 mb-1"
-                      htmlFor="subtitles-switch"
+                      className={cn(
+                        "text-xs mb-1",
+                        selectedOption === "audio-only"
+                          ? "text-white/30"
+                          : "text-white/60"
+                      )}
+                      htmlFor="thumbnail-switch"
                     >
-                      Subtitles:
+                      Thumbnail:
                     </label>
                     <div className="flex items-center gap-2">
                       <Switch
-                        id="subtitles-switch"
+                        id="thumbnail-switch"
                         className="cursor-pointer"
+                        disabled={selectedOption === "audio-only"}
+                        checked={thumbnailEnabled}
+                        onCheckedChange={setThumbnailEnabled}
                       />
-                      <span className="text-sm text-white/80">
-                        Export subtitles (.srt)
+                      <span
+                        className={cn(
+                          "text-sm",
+                          selectedOption === "audio-only"
+                            ? "text-white/30"
+                            : "text-white/80"
+                        )}
+                      >
+                        Auto import subtitles
                       </span>
                     </div>
                   </div>
