@@ -39,15 +39,15 @@ export function NavbarMain() {
   const navItems = [
     {
       name: "Features",
-      link: "#features",
+      link: "/features",
     },
     {
       name: "Pricing",
-      link: "#pricing",
+      link: "/pricing",
     },
     {
       name: "Contact",
-      link: "#contact",
+      link: "/contact",
     },
   ];
 
