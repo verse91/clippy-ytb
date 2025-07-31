@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClients";
+import { useAuth } from "@/lib/auth-context";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ interface SignInModalProps {
 }
 
 export default function SignInModal({ trigger }: SignInModalProps) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -30,38 +32,122 @@ export default function SignInModal({ trigger }: SignInModalProps) {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-      });
+      // Check if it's a mobile device
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
 
-      if (error) {
-        console.error("Login error:", error.message);
-        setError(error.message);
+      if (isMobile) {
+        // For mobile, use a simpler approach without redirect
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            queryParams: {
+              access_type: "offline",
+              prompt: "consent",
+            },
+          },
+        });
+
+        if (error) {
+          console.error("Login error:", error.message);
+          setError(error.message);
+          setLoading(false);
+        } else {
+          // For mobile, we'll let the auth context handle the state
+          console.log("Mobile sign in initiated");
+          // Keep loading state to prevent modal from closing too quickly
+          // The useEffect will handle closing the modal once user is authenticated
+        }
+      } else {
+        // Use popup for desktop devices
+        const width = 400;
+        const height = 500;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+
+        const popup = window.open(
+          `${window.location.origin}/auth/signin`,
+          "auth-popup",
+          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+        );
+
+        if (!popup) {
+          setError("Please allow popups to sign in");
+          setLoading(false);
+          return;
+        }
+
+        // Listen for messages from the popup
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+
+          if (event.data.type === "AUTH_SUCCESS") {
+            // Authentication successful
+            setLoading(false);
+            setOpen(false);
+            window.removeEventListener("message", handleMessage);
+          }
+        };
+
+        window.addEventListener("message", handleMessage);
+
+        // Check if popup is closed
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            setLoading(false);
+            window.removeEventListener("message", handleMessage);
+          }
+        }, 1000);
       }
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
 
-  // Reset terms acceptance when modal closes
+  // Close modal when user is successfully authenticated
+  useEffect(() => {
+    if (user && open) {
+      // Add a small delay to prevent immediate closure on mobile
+      const timer = setTimeout(() => {
+        setLoading(false);
+        setOpen(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, open]);
+
+  // Reset error and loading when modal closes, but preserve terms acceptance for better UX
   useEffect(() => {
     if (!open) {
-      setAccepted(false);
       setError(null);
+      setLoading(false);
+      // Don't reset accepted state to improve mobile UX
+      // setAccepted(false);
     }
   }, [open]);
+
+  // Reset terms acceptance only when component unmounts or user changes
+  useEffect(() => {
+    if (!user) {
+      setAccepted(false);
+    }
+  }, [user]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[80vh]">
         <div className="flex flex-col gap-2">
           <DialogTitle className="text-2xl font-semibold">Sign In</DialogTitle>
           {/* Terms and Conditions scroll area */}
-          <ScrollArea className="h-48 border rounded-md p-3 bg-muted/30 my-2">
+          <ScrollArea className="h-80 border rounded-md p-3 bg-muted/30 my-2">
             <div className="space-y-4 text-sm text-muted-foreground">
               {TERMS_TEXT.map((section, idx) => (
                 <div key={idx}>

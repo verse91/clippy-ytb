@@ -1,4 +1,14 @@
 "use client";
+import SignInModal from "@/components/login-form";
+import { useAuth } from "@/lib/auth-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Navbar,
   NavBody,
@@ -10,21 +20,34 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/navbar/resizable-navbar";
+import { BoxChat } from "@/components/homepage/box-chat";
 import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 export function NavbarMain() {
+  const { user, signOut, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   const navItems = [
     {
       name: "Features",
-      link: "#features",
+      link: "/features",
     },
     {
       name: "Pricing",
-      link: "#pricing",
+      link: "/pricing",
     },
     {
       name: "Contact",
-      link: "#contact",
+      link: "/contact",
     },
   ];
 
@@ -38,8 +61,74 @@ export function NavbarMain() {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="primary">Book a call</NavbarButton>
+            <NavbarButton
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Star it on GitHub ⭐"
+              href="https://github.com/verse91/clippy-ytb"
+              variant="primary"
+              className="flex items-center gap-2"
+            >
+              <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
+              Star on GitHub
+            </NavbarButton>
+            {loading ? (
+              <div className="p-3">
+                <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+              </div>
+            ) : user ? (
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <NavbarButton
+                      variant="secondary"
+                      className="rounded-full p-0 w-9 h-9 flex items-center justify-center"
+                    >
+                      <Image
+                        src={
+                          user.user_metadata?.picture ||
+                          "/assets/icons/logo-no-bg.png"
+                        }
+                        alt="User Avatar"
+                        width={35}
+                        height={35}
+                        className="rounded-full"
+                      />
+                    </NavbarButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 z-[100]"
+                    align="start"
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel>
+                      {user.user_metadata?.name || "User"}
+                    </DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground -mt-3 mb-3">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <i className="bx bxs-credit-card-alt text-sm text-white"></i>
+                      Buy credits
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleSignOut}
+                    >
+                      <i className="bx bxs-arrow-out-right-square-half text-sm text-white"></i>
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <SignInModal
+                trigger={
+                  <NavbarButton variant="secondary">Sign in</NavbarButton>
+                }
+              />
+            )}
           </div>
         </NavBody>
 
@@ -68,124 +157,75 @@ export function NavbarMain() {
               </a>
             ))}
             <div className="flex w-full flex-col gap-4">
+              {loading ? (
+                <div className="flex justify-center p-3">
+                  <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                </div>
+              ) : user ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 p-2">
+                    <Image
+                      src={
+                        user.user_metadata?.picture ||
+                        "/assets/icons/logo-no-bg.png"
+                      }
+                      alt="User Avatar"
+                      width={35}
+                      height={35}
+                      className="rounded-full border shadow"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                        {user.user_metadata?.name || "User"}
+                      </span>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {user.email}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="border-t border-neutral-200 dark:border-neutral-700 pt-2">
+                    <button className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
+                      <i className="bx bxs-credit-card-alt text-sm mr-2"></i>
+                      Buy credits
+                    </button>
+                    <button
+                      className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
+                      onClick={handleSignOut}
+                    >
+                      <i className="bx bxs-arrow-out-right-square-half text-sm mr-2"></i>
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <SignInModal
+                  trigger={
+                    <NavbarButton
+                      variant="primary"
+                      className="w-full"
+                    >
+                      Sign in
+                    </NavbarButton>
+                  }
+                />
+              )}
               <NavbarButton
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Star it on GitHub ⭐"
+                href="https://github.com/verse91/clippy-ytb"
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
-                className="w-full"
+                className="w-full flex items-center gap-2"
               >
-                Login
-              </NavbarButton>
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Book a call
+                <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
+                Star on GitHub
               </NavbarButton>
             </div>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-      <DummyContent />
-
-      {/* Navbar */}
+      {/* <BoxChat /> */}
     </div>
   );
 }
-
-const DummyContent = () => {
-  return (
-    <div className="container mx-auto p-8 pt-24">
-      <h1 className="mb-4 text-center text-3xl font-bold">
-        Check the navbar at the top of the container
-      </h1>
-      <p className="mb-10 text-center text-sm text-zinc-500">
-        For demo purpose we have kept the position as{" "}
-        <span className="font-medium">Sticky</span>. Keep in mind that this
-        component is <span className="font-medium">fixed</span> and will not
-        move when scrolling.
-      </p>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        {[
-          {
-            id: 1,
-            title: "The",
-            width: "md:col-span-1",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 2,
-            title: "First",
-            width: "md:col-span-2",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 3,
-            title: "Rule",
-            width: "md:col-span-1",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 4,
-            title: "Of",
-            width: "md:col-span-3",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 5,
-            title: "F",
-            width: "md:col-span-1",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 6,
-            title: "Club",
-            width: "md:col-span-2",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 7,
-            title: "Is",
-            width: "md:col-span-2",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 8,
-            title: "You",
-            width: "md:col-span-1",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 9,
-            title: "Do NOT TALK about",
-            width: "md:col-span-2",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-          {
-            id: 10,
-            title: "F Club",
-            width: "md:col-span-1",
-            height: "h-60",
-            bg: "bg-neutral-100 dark:bg-neutral-800",
-          },
-        ].map((box) => (
-          <div
-            key={box.id}
-            className={`${box.width} ${box.height} ${box.bg} flex items-center justify-center rounded-lg p-4 shadow-sm`}
-          >
-            <h2 className="text-xl font-medium">{box.title}</h2>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
