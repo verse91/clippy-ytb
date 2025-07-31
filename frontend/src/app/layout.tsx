@@ -16,6 +16,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Clippy - Turn moments into clips",
   description: "Make viral clips with Clippy",
+  other: {
+    link: [
+      {
+        rel: "stylesheet",
+        href: "https://cdn.boxicons.com/fonts/basic/boxicons.min.css",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -25,16 +37,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <head>
-        <link
-          href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
-          rel="stylesheet"
-        ></link>
-        <link
-          href="https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css"
-          rel="stylesheet"
-        ></link>
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >

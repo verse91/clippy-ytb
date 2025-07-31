@@ -52,11 +52,11 @@
     }
   }
   @keyframes shine {
-  0% {
-    background-position: 100%;
+    0% {
+      background-position: 100%;
     }
-  100% {
-    background-position: -100%;
+    100% {
+      background-position: -100%;
     }
   }
 }
@@ -131,8 +131,8 @@
 }
 
 @font-face {
-  font-family: 'FTV';
-  src: url('/assets/fonts/logo-font/1FTV-The-Bold-Font.otf') format('opentype');
+  font-family: "FTV";
+  src: url("/assets/fonts/logo-font/1FTV-The-Bold-Font.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
@@ -147,47 +147,53 @@
 /* Start Generation Here */
 /* Start of Selection */
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Thin.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Thin.otf")
+    format("opentype");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Light.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Light.otf")
+    format("opentype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Regular.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Regular.otf")
+    format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Medium.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Medium.otf")
+    format("opentype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Semibold.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Semibold.otf")
+    format("opentype");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'SF-Pro-Display';
-  src: url('/assets/fonts/components-fonts/SF-Pro-Display-Bold.otf') format('otf');
+  font-family: "SF-Pro-Display";
+  src: url("/assets/fonts/components-fonts/SF-Pro-Display-Bold.otf")
+    format("opentype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -195,7 +201,6 @@
 /* End of Selection */
 
 .lab-bg::before {
-
   overflow: hidden;
 
   max-width: 100vw;
@@ -203,5 +208,4 @@
   max-height: 100vh;
 
   box-sizing: border-box;
-
 }

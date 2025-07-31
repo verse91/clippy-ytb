@@ -17,6 +17,10 @@ import {
   LoaderIcon,
   Sparkles,
   Command,
+  Download,
+  Video,
+  Music,
+  Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
@@ -29,6 +33,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+// Helper functions for YouTube URL validation
+const isYouTubeUrl = (url: string): boolean => {
+  const youtubePatterns = [
+    "https://youtube.com",
+    "https://www.youtube.com",
+    "https://youtu.be",
+    "www.youtube.com",
+    "youtu.be",
+    "youtube.com",
+  ];
+  return youtubePatterns.some((pattern) => url.startsWith(pattern));
+};
+
+const hasPlaylist = (url: string): boolean => {
+  return url.includes("list=");
+};
 
 interface UseAutoResizeTextareaProps {
   minHeight: number;
@@ -159,28 +180,28 @@ export function BoxChat() {
 
   const commandSuggestions: CommandSuggestion[] = [
     {
-      icon: <ImageIcon className="w-4 h-4" />,
-      label: "Clone UI",
-      description: "Generate a UI from a screenshot",
-      prefix: "/clone",
+      icon: <Download className="w-4 h-4" />,
+      label: "Download Video",
+      description: "Download the full video",
+      prefix: "/download",
     },
     {
-      icon: <Figma className="w-4 h-4" />,
-      label: "Import Figma",
-      description: "Import a design from Figma",
-      prefix: "/figma",
+      icon: <Video className="w-4 h-4" />,
+      label: "Extract Clip",
+      description: "Extract a specific time range",
+      prefix: "/clip",
     },
     {
-      icon: <MonitorIcon className="w-4 h-4" />,
-      label: "Create Page",
-      description: "Generate a new web page",
-      prefix: "/page",
+      icon: <Music className="w-4 h-4" />,
+      label: "Audio Only",
+      description: "Download audio only",
+      prefix: "/audio",
     },
     {
-      icon: <Sparkles className="w-4 h-4" />,
-      label: "Improve",
-      description: "Improve existing UI design",
-      prefix: "/improve",
+      icon: <Clock className="w-4 h-4" />,
+      label: "Time Range",
+      description: "Set custom time range",
+      prefix: "/time",
     },
   ];
 
@@ -442,7 +463,11 @@ export function BoxChat() {
                       SponsorBlock:
                     </label>
                     <div className="flex items-center gap-2">
-                      <Switch id="audio-switch" className="cursor-pointer" checked={true} />
+                      <Switch
+                        id="audio-switch"
+                        className="cursor-pointer"
+                        checked={true}
+                      />
                       <span className="text-sm text-white/80">
                         Auto block sponsor
                       </span>
@@ -512,32 +537,13 @@ export function BoxChat() {
           isVisible={isTyping}
           icon={<i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>}
           text={
-            value.includes("list=") &&
-            (value.startsWith("https://youtube.com") ||
-              value.startsWith("https://www.youtube.com") ||
-              value.startsWith("https://youtu.be") ||
-              value.startsWith("www.youtube.com") ||
-              value.startsWith("youtu.be") ||
-              value.startsWith("youtube.com"))
+            hasPlaylist(value) && isYouTubeUrl(value)
               ? "We do not support to download full playlist"
-              : value.startsWith("https://youtube.com") ||
-                value.startsWith("https://www.youtube.com") ||
-                value.startsWith("https://youtu.be") ||
-                value.startsWith("www.youtube.com") ||
-                value.startsWith("youtu.be") ||
-                value.startsWith("youtube.com")
+              : isYouTubeUrl(value)
               ? "Processing"
               : "This is not a Youtube video link"
           }
-          showTypingDots={
-            !value.includes("list=") &&
-            (value.startsWith("https://youtube.com") ||
-              value.startsWith("https://www.youtube.com") ||
-              value.startsWith("https://youtu.be") ||
-              value.startsWith("www.youtube.com") ||
-              value.startsWith("youtu.be") ||
-              value.startsWith("youtube.com"))
-          }
+          showTypingDots={!hasPlaylist(value) && isYouTubeUrl(value)}
         />
       ) : null}
 
@@ -612,7 +618,12 @@ const rippleKeyframes = `
 `;
 
 if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.innerHTML = rippleKeyframes;
-  document.head.appendChild(style);
+  // Check if the style already exists to prevent duplicates
+  const existingStyle = document.querySelector("style[data-ripple-keyframes]");
+  if (!existingStyle) {
+    const style = document.createElement("style");
+    style.setAttribute("data-ripple-keyframes", "true");
+    style.innerHTML = rippleKeyframes;
+    document.head.appendChild(style);
+  }
 }

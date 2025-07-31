@@ -13,8 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
-
 export default function Navbar() {
   const { user, signOut, loading } = useAuth();
 
@@ -38,9 +36,11 @@ export default function Navbar() {
           </span>
         </a> */}
         <a href="/">
-          <img
+          <Image
             src="/assets/icons/logo-no-bg.png"
             alt="Clippy Logo"
+            width={48}
+            height={48}
             className="h-12 w-auto select-none"
           />
         </a>
@@ -50,6 +50,7 @@ export default function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             title="Star it on GitHub ⭐"
+            aria-label="GitHub repository"
             className="transition-colors group"
           >
             <i className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
@@ -63,7 +64,7 @@ export default function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Image
-                    src={user.user_metadata.picture}
+                    src={user.user_metadata?.picture}
                     alt="User Avatar"
                     width={35}
                     height={35}
@@ -72,7 +73,7 @@ export default function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="start">
                   <DropdownMenuLabel>
-                    {user.user_metadata.name}
+                    {user.user_metadata?.name || "User"}
                   </DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs text-muted-foreground -mt-3 mb-3">
                     {user.email}

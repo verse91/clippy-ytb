@@ -15,7 +15,7 @@ export default function Home() {
         <Navbar />
         <div
           className="w-full h-full flex items-start justify-center pt-16 sm:pt-24 md:pt-32 lg:pt-48 px-4 sm:px-6 lg:px-8"
-          style={{ fontFamily: "SF-Pro-Display" }}
+          style={{ fontFamily: "SF-Pro-Display, Arial, sans-serif" }}
         >
           <div className="flex flex-col items-center gap-2 sm:gap-4 w-full max-w-7xl">
             <TextShimmerWave

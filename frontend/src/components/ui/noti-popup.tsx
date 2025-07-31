@@ -45,6 +45,8 @@ export default function NotiPopup({
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          role="alert"
+          aria-live="polite"
           className={`fixed left-1/2 bottom-8 -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05] z-50 ${className}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

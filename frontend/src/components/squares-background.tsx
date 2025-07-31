@@ -162,19 +162,12 @@ export function BackGround({
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [
-    direction,
-    speed,
-    borderColor,
-    hoverFillColor,
-    hoveredSquare,
-    squareSize,
-  ]);
+  }, [direction, speed, borderColor, hoverFillColor, squareSize]);
 
   return (
-      <canvas
-        ref={canvasRef}
-        className={`w-full h-full border-none block ${className}`}
-      />
+    <canvas
+      ref={canvasRef}
+      className={`w-full h-full border-none block ${className}`}
+    />
   );
 }

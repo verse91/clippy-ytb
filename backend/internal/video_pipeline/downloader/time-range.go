@@ -10,14 +10,8 @@ import (
 	"time"
 )
 
-var begin, end string
-
-func TimeRangeFHD(videoURL string) {
+func TimeRangeFHD(videoURL, begin, end string) {
 	start := time.Now()
-	fmt.Println("Iput begin: ")
-	fmt.Scanf("%s\n", &begin)
-	fmt.Println("Iput end: ")
-	fmt.Scanf("%s\n", &end)
 	fmt.Println("Begin, end:", begin, end)
 
 	// ../bin/yt-dlp.exe --no-playlist -f "bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best" -S "res:1080,+codec:avc1,+br" -o "%(title)s (%(height)sp, h264).%(ext)s" ""
