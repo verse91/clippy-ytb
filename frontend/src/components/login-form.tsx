@@ -28,30 +28,46 @@ export default function SignInModal({ trigger }: SignInModalProps) {
   const handleSignIn = async () => {
     setLoading(true);
     setError(null);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
-      });
 
-      if (error) {
-        console.error("Login error:", error.message);
-        setError(error.message);
-      } else if (data) {
-        // The popup will handle the authentication flow
-        console.log("Sign in initiated");
+    try {
+      // Open popup window
+      const popup = window.open(
+        `${window.location.origin}/auth/signin`,
+        "auth-popup",
+        "width=500,height=600,scrollbars=yes,resizable=yes"
+      );
+
+      if (!popup) {
+        setError("Please allow popups to sign in");
+        setLoading(false);
+        return;
       }
+
+      // Listen for messages from the popup
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === "AUTH_SUCCESS") {
+          // Authentication successful
+          setLoading(false);
+          setOpen(false);
+          window.removeEventListener("message", handleMessage);
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+
+      // Check if popup is closed
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          setLoading(false);
+          window.removeEventListener("message", handleMessage);
+        }
+      }, 1000);
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
