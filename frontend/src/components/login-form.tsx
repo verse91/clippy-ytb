@@ -28,15 +28,25 @@ export default function SignInModal({ trigger }: SignInModalProps) {
   const handleSignIn = async () => {
     setLoading(true);
     setError(null);
-
+    
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
       });
 
       if (error) {
         console.error("Login error:", error.message);
         setError(error.message);
+      } else if (data) {
+        // The popup will handle the authentication flow
+        console.log("Sign in initiated");
       }
     } catch (err) {
       console.error("Login error:", err);

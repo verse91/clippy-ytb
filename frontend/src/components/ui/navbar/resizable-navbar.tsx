@@ -69,7 +69,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     <motion.div
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-      className={cn("fixed inset-x-0 z-40 w-full", className)}
+      className={cn("fixed inset-x-0 z-30 w-full", className)}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -265,7 +265,6 @@ export const NavbarLogo = () => {
         alt="logo"
         width={40}
         height={40}
-
       />
     </a>
   );

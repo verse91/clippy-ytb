@@ -1,4 +1,14 @@
 "use client";
+import SignInModal from "@/components/login-form";
+import { useAuth } from "@/lib/auth-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Navbar,
   NavBody,
@@ -12,8 +22,20 @@ import {
 } from "@/components/ui/navbar/resizable-navbar";
 import { BoxChat } from "@/components/homepage/box-chat";
 import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 export function NavbarMain() {
+  const { user, signOut, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   const navItems = [
     {
       name: "Features",
@@ -40,22 +62,73 @@ export function NavbarMain() {
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
             <NavbarButton
-              variant="secondary"
-            >
-              Login
-            </NavbarButton>
-            <NavbarButton
               target="_blank"
               rel="noopener noreferrer"
               title="Star it on GitHub ⭐"
               href="https://github.com/verse91/clippy-ytb"
-              onClick={() => setIsMobileMenuOpen(false)}
               variant="primary"
-              className="w-full flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
               Star on GitHub
             </NavbarButton>
+            {loading ? (
+              <div className="p-3">
+                <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+              </div>
+            ) : user ? (
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <NavbarButton
+                      variant="secondary"
+                      className="rounded-full p-0 w-9 h-9 flex items-center justify-center"
+                    >
+                      <Image
+                        src={
+                          user.user_metadata?.picture ||
+                          "/assets/icons/logo-no-bg.png"
+                        }
+                        alt="User Avatar"
+                        width={35}
+                        height={35}
+                        className="rounded-full"
+                      />
+                    </NavbarButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 z-[100]"
+                    align="start"
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel>
+                      {user.user_metadata?.name || "User"}
+                    </DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground -mt-3 mb-3">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <i className="bx bxs-credit-card-alt text-sm text-white"></i>
+                      Buy credits
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleSignOut}
+                    >
+                      <i className="bx bxs-arrow-out-right-square-half text-sm text-white"></i>
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <SignInModal
+                trigger={
+                  <NavbarButton variant="secondary">Sign in</NavbarButton>
+                }
+              />
+            )}
           </div>
         </NavBody>
 
@@ -84,13 +157,59 @@ export function NavbarMain() {
               </a>
             ))}
             <div className="flex w-full flex-col gap-4">
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Login
-              </NavbarButton>
+              {loading ? (
+                <div className="flex justify-center p-3">
+                  <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                </div>
+              ) : user ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 p-2">
+                    <Image
+                      src={
+                        user.user_metadata?.picture ||
+                        "/assets/icons/logo-no-bg.png"
+                      }
+                      alt="User Avatar"
+                      width={35}
+                      height={35}
+                      className="rounded-full border shadow"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                        {user.user_metadata?.name || "User"}
+                      </span>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {user.email}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="border-t border-neutral-200 dark:border-neutral-700 pt-2">
+                    <button className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
+                      <i className="bx bxs-credit-card-alt text-sm mr-2"></i>
+                      Buy credits
+                    </button>
+                    <button
+                      className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
+                      onClick={handleSignOut}
+                    >
+                      <i className="bx bxs-arrow-out-right-square-half text-sm mr-2"></i>
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <SignInModal
+                  trigger={
+                    <NavbarButton
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      variant="primary"
+                      className="w-full"
+                    >
+                      Sign in
+                    </NavbarButton>
+                  }
+                />
+              )}
               <NavbarButton
                 target="_blank"
                 rel="noopener noreferrer"
@@ -98,15 +217,16 @@ export function NavbarMain() {
                 href="https://github.com/verse91/clippy-ytb"
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
-                className="w-full"
+                className="w-full flex items-center gap-2"
               >
+                <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
                 Star on GitHub
               </NavbarButton>
             </div>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-        {/* <BoxChat /> */}
+      {/* <BoxChat /> */}
     </div>
   );
 }
