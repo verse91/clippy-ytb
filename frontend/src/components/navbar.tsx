@@ -101,9 +101,8 @@ export default function Navbar() {
                   variant="default"
                   title="Sign In"
                 >
-                  <i className="bx bxs-arrow-in-right-square-half text-3xl text-black"></i>
                   <p
-                    className="font-bold mr-1"
+                    className="font-bold"
                     style={{ fontFamily: "SF-Pro-Display" }}
                   >
                     Sign in
