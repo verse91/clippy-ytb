@@ -1,5 +1,5 @@
 "use client";
-import { type JSX } from "react";
+import React, { type JSX } from "react";
 import { motion, Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,17 @@ export function TextShimmerWave({
     Component as keyof JSX.IntrinsicElements
   );
 
+  // Memoize the character array to prevent unnecessary re-renders
+  const characters = React.useMemo(() => children.split(""), [children]);
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = React.useMemo(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+    return false;
+  }, []);
+
   return (
     <MotionComponent
       className={cn(
@@ -44,12 +55,12 @@ export function TextShimmerWave({
       )}
       style={{ color: "var(--base-color)" }}
     >
-      {children.split("").map((char, i) => {
-        const delay = (i * duration * (1 / spread)) / children.length;
+      {characters.map((char, i) => {
+        const delay = (i * duration * (1 / spread)) / characters.length;
 
         return (
           <motion.span
-            key={i}
+            key={`char-${i}-${char}`}
             className={cn(
               "inline-block whitespace-pre [transform-style:preserve-3d]"
             )}
@@ -59,26 +70,34 @@ export function TextShimmerWave({
               rotateY: 0,
               color: "var(--base-color)",
             }}
-            animate={{
-              translateZ: [0, zDistance, 0],
-              translateX: [0, xDistance, 0],
-              translateY: [0, yDistance, 0],
-              scale: [1, scaleDistance, 1],
-              rotateY: [0, rotateYDistance, 0],
-              color: [
-                "var(--base-color)",
-                "var(--base-gradient-color)",
-                "var(--base-color)",
-              ],
-            }}
-            transition={{
-              duration: duration,
-              repeat: Infinity,
-              repeatDelay: (children.length * 0.05) / spread,
-              delay,
-              ease: "easeInOut",
-              ...transition,
-            }}
+            animate={
+              prefersReducedMotion
+                ? {}
+                : {
+                    translateZ: [0, zDistance, 0],
+                    translateX: [0, xDistance, 0],
+                    translateY: [0, yDistance, 0],
+                    scale: [1, scaleDistance, 1],
+                    rotateY: [0, rotateYDistance, 0],
+                    color: [
+                      "var(--base-color)",
+                      "var(--base-gradient-color)",
+                      "var(--base-color)",
+                    ],
+                  }
+            }
+            transition={
+              prefersReducedMotion
+                ? {}
+                : {
+                    duration: duration,
+                    repeat: Infinity,
+                    repeatDelay: (characters.length * 0.05) / spread,
+                    delay,
+                    ease: "easeInOut",
+                    ...transition,
+                  }
+            }
           >
             {char}
           </motion.span>

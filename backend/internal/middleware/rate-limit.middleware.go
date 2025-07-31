@@ -50,13 +50,65 @@ func getEnvAsFloat(name string, defaultVal float64) float64 {
 }
 
 func getClientIP(c fiber.Ctx) string {
-	ip := c.Get("X-Forwarded-For")
-	if ip == "" {
-		ip = c.IP()
-	} else {
-		ip = strings.Split(ip, ",")[0]
+	// Check various proxy headers in order of preference
+	headers := []string{
+		"X-Forwarded-For",
+		"X-Real-IP",
+		"X-Client-IP",
+		"CF-Connecting-IP", // Cloudflare
+		"True-Client-IP",   // Akamai
 	}
-	return strings.TrimSpace(ip)
+
+	for _, header := range headers {
+		if ip := c.Get(header); ip != "" {
+			// Handle multiple IPs in X-Forwarded-For (first one is the client)
+			ips := strings.Split(ip, ",")
+			if len(ips) > 0 {
+				clientIP := strings.TrimSpace(ips[0])
+				// Basic validation for IP format
+				if isValidIP(clientIP) {
+					return clientIP
+				}
+			}
+		}
+	}
+
+	// Fallback to direct IP
+	ip := c.IP()
+	if isValidIP(ip) {
+		return ip
+	}
+
+	// Last resort - return the IP as is
+	return ip
+}
+
+func isValidIP(ip string) bool {
+	// Basic validation for IPv4 and IPv6
+	if ip == "" {
+		return false
+	}
+
+	// Check for IPv4 format
+	if strings.Contains(ip, ".") {
+		parts := strings.Split(ip, ".")
+		if len(parts) != 4 {
+			return false
+		}
+		for _, part := range parts {
+			if part == "" {
+				return false
+			}
+		}
+		return true
+	}
+
+	// Check for IPv6 format (basic check)
+	if strings.Contains(ip, ":") {
+		return len(ip) > 0
+	}
+
+	return false
 }
 
 func getLimiter(ip string) *rate.Limiter {
@@ -74,18 +126,36 @@ func getLimiter(ip string) *rate.Limiter {
 }
 
 func CleanupClients(ctx context.Context) {
+	logger.Log.Info("Starting rate limiter cleanup routine",
+		zap.Int("cleanup_interval_seconds", cleanupInterval),
+		zap.Int("client_ttl_seconds", clientTTL),
+	)
+
+	ticker := time.NewTicker(time.Duration(cleanupInterval) * time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
+			logger.Log.Info("Rate limiter cleanup routine stopped due to context cancellation")
 			return
-		case <-time.After(time.Duration(cleanupInterval) * time.Second):
+		case <-ticker.C:
 			mu.Lock()
+			removedCount := 0
 			for ip, client := range clients {
 				if time.Since(client.lastSeen) > time.Duration(clientTTL)*time.Second {
 					delete(clients, ip)
+					removedCount++
 				}
 			}
 			mu.Unlock()
+
+			if removedCount > 0 {
+				logger.Log.Info("Cleaned up expired rate limiter clients",
+					zap.Int("removed_count", removedCount),
+					zap.Int("remaining_clients", len(clients)),
+				)
+			}
 		}
 	}
 }

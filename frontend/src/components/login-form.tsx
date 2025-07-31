@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClients";
 import { useAuth } from "@/lib/auth-context";
@@ -26,10 +26,26 @@ export default function SignInModal({ trigger }: SignInModalProps) {
   const [open, setOpen] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const popupRef = useRef<Window | null>(null);
+  const checkClosedIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const messageListenerRef = useRef<((event: MessageEvent) => void) | null>(
+    null
+  );
 
   const handleSignIn = async () => {
     setLoading(true);
     setError(null);
+
+    // Clean up any existing popup and listeners
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
+    }
+    if (checkClosedIntervalRef.current) {
+      clearInterval(checkClosedIntervalRef.current);
+    }
+    if (messageListenerRef.current) {
+      window.removeEventListener("message", messageListenerRef.current);
+    }
 
     try {
       // Check if it's a mobile device
@@ -75,10 +91,14 @@ export default function SignInModal({ trigger }: SignInModalProps) {
         );
 
         if (!popup) {
-          setError("Please allow popups to sign in");
+          setError(
+            "Please allow popups to sign in. You can enable popups in your browser settings."
+          );
           setLoading(false);
           return;
         }
+
+        popupRef.current = popup;
 
         // Listen for messages from the popup
         const handleMessage = (event: MessageEvent) => {
@@ -88,10 +108,16 @@ export default function SignInModal({ trigger }: SignInModalProps) {
             // Authentication successful
             setLoading(false);
             setOpen(false);
-            window.removeEventListener("message", handleMessage);
+            cleanupPopup();
+          } else if (event.data.type === "AUTH_ERROR") {
+            // Authentication failed
+            setError(event.data.error || "Authentication failed");
+            setLoading(false);
+            cleanupPopup();
           }
         };
 
+        messageListenerRef.current = handleMessage;
         window.addEventListener("message", handleMessage);
 
         // Check if popup is closed
@@ -99,9 +125,11 @@ export default function SignInModal({ trigger }: SignInModalProps) {
           if (popup.closed) {
             clearInterval(checkClosed);
             setLoading(false);
-            window.removeEventListener("message", handleMessage);
+            cleanupPopup();
           }
         }, 1000);
+
+        checkClosedIntervalRef.current = checkClosed;
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -109,6 +137,28 @@ export default function SignInModal({ trigger }: SignInModalProps) {
       setLoading(false);
     }
   };
+
+  const cleanupPopup = () => {
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
+      popupRef.current = null;
+    }
+    if (checkClosedIntervalRef.current) {
+      clearInterval(checkClosedIntervalRef.current);
+      checkClosedIntervalRef.current = null;
+    }
+    if (messageListenerRef.current) {
+      window.removeEventListener("message", messageListenerRef.current);
+      messageListenerRef.current = null;
+    }
+  };
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      cleanupPopup();
+    };
+  }, []);
 
   // Close modal when user is successfully authenticated
   useEffect(() => {
@@ -118,7 +168,7 @@ export default function SignInModal({ trigger }: SignInModalProps) {
         setLoading(false);
         setOpen(false);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [user, open]);
@@ -128,6 +178,7 @@ export default function SignInModal({ trigger }: SignInModalProps) {
     if (!open) {
       setError(null);
       setLoading(false);
+      cleanupPopup();
       // Don't reset accepted state to improve mobile UX
       // setAccepted(false);
     }
@@ -155,17 +206,78 @@ export default function SignInModal({ trigger }: SignInModalProps) {
                     {section.title}
                   </div>
                   {/* Highlight my email in terms */}
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: section.content
-                        .replace(
-                          "versedev.store@proton.me",
-                          '<a href="mailto:versedev.store@proton.me" class="text-white underline underline-offset-4">versedev.store@proton.me</a>'
-                        )
-                        .replace(/\n/g, "<br/>")
-                        .replace(/^- /gm, "• "),
-                    }}
-                  />
+                  <div className="text-sm text-muted-foreground">
+                    {section.content
+                      .split("\n")
+                      .map((line, lineIndex) => {
+                        // Replace email with mailto link
+                        const emailRegex = /versedev\.store@proton\.me/g;
+                        const parts = line.split(emailRegex);
+
+                        if (parts.length === 1) {
+                          // No email found, render as plain text
+                          if (line === "") {
+                            return <br key={lineIndex} />;
+                          }
+                          // Handle bullet points
+                          if (line.startsWith("- ")) {
+                            return (
+                              <div
+                                key={lineIndex}
+                                className="flex items-start gap-2"
+                              >
+                                <span className="text-white/60">•</span>
+                                <span>{line.substring(2)}</span>
+                              </div>
+                            );
+                          }
+                          return <span key={lineIndex}>{line}</span>;
+                        }
+
+                        // Email found, render with link
+                        const elements: React.ReactElement[] = [];
+                        parts.forEach((part, partIndex) => {
+                          if (partIndex > 0) {
+                            // Add email link
+                            elements.push(
+                              <a
+                                key={`email-${lineIndex}-${partIndex}`}
+                                href="mailto:versedev.store@proton.me"
+                                className="text-white underline underline-offset-4"
+                              >
+                                versedev.store@proton.me
+                              </a>
+                            );
+                          }
+                          if (part) {
+                            elements.push(
+                              <span key={`part-${lineIndex}-${partIndex}`}>
+                                {part}
+                              </span>
+                            );
+                          }
+                        });
+
+                        // Handle bullet points for lines with email
+                        if (line.startsWith("- ")) {
+                          return (
+                            <div
+                              key={lineIndex}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="text-white/60">•</span>
+                              <div>{elements}</div>
+                            </div>
+                          );
+                        }
+                        return <div key={lineIndex}>{elements}</div>;
+                      })
+                      .map((element, index) => {
+                        // Handle bullet points - element is now a React element, not a string
+                        // The bullet point handling should be done in the first map
+                        return element;
+                      })}
+                  </div>
                 </div>
               ))}
             </div>

@@ -110,7 +110,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         mass: 0.8,
       }}
       style={{
-        minWidth: "800px",
+        minWidth: "min(800px, 90vw)",
       }}
       className={cn(
         "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 lg:flex dark:bg-transparent",
@@ -255,17 +255,14 @@ export const MobileNavToggle = ({
 };
 
 export const NavbarLogo = () => {
+  const logoSrc = "/assets/icons/logo-no-bg.png";
+
   return (
     <a
       href="/"
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
-      <Image
-        src="/assets/icons/logo-no-bg.png"
-        alt="logo"
-        width={40}
-        height={40}
-      />
+      <Image src={logoSrc} alt="logo" width={40} height={40} />
     </a>
   );
 };

@@ -160,23 +160,64 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = "Textarea";
 
+const rippleKeyframes = `
+@keyframes ripple {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+`;
+
 export function BoxChat() {
   const [value, setValue] = useState("");
-  const [attachments, setAttachments] = useState<string[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [selectedOption, setSelectedOption] = useState("auto");
+  const [thumbnailEnabled, setThumbnailEnabled] = useState(true);
+  const [attachments, setAttachments] = useState<string[]>([]);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<number | null>(
+    null
+  );
   const [isPending, startTransition] = useTransition();
   const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [recentCommand, setRecentCommand] = useState<string | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
-    minHeight: 60,
-    maxHeight: 200,
-  });
-  const [inputFocused, setInputFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const commandPaletteRef = useRef<HTMLDivElement>(null);
-  const [selectedOption, setSelectedOption] = useState<string>("auto");
-  const [thumbnailEnabled, setThumbnailEnabled] = useState<boolean>(false);
+  const { textareaRef: autoResizeTextareaRef, adjustHeight } =
+    useAutoResizeTextarea({
+      minHeight: 60,
+      maxHeight: 200,
+    });
+
+  // Use the auto-resize textarea ref
+  const textareaRefToUse = autoResizeTextareaRef;
+
+  // Inject ripple styles on client side only
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      // Check if the style already exists to prevent duplicates
+      const existingStyle = document.querySelector(
+        "style[data-ripple-keyframes]"
+      );
+      if (!existingStyle) {
+        const style = document.createElement("style");
+        style.setAttribute("data-ripple-keyframes", "true");
+        style.innerHTML = rippleKeyframes;
+        document.head.appendChild(style);
+      }
+    }
+
+    // Cleanup function to remove the style when component unmounts
+    return () => {
+      if (typeof document !== "undefined") {
+        const style = document.querySelector("style[data-ripple-keyframes]");
+        if (style) {
+          style.remove();
+        }
+      }
+    };
+  }, []);
 
   const commandSuggestions: CommandSuggestion[] = [
     {
@@ -355,7 +396,7 @@ export function BoxChat() {
           >
             <div className="p-4 flex pr-8">
               <Textarea
-                ref={textareaRef}
+                ref={textareaRefToUse}
                 value={value}
                 onChange={(e) => {
                   setValue(e.target.value);
@@ -387,6 +428,8 @@ export function BoxChat() {
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 disabled={isTyping || !value.trim()}
+                aria-label="Send message"
+                aria-describedby="send-button-description"
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-medium transition-all h-10",
                   "flex items-center gap-2",
@@ -401,6 +444,11 @@ export function BoxChat() {
                   <SendIcon className="w-3 h-3" />
                 )}
               </motion.button>
+              <div id="send-button-description" className="sr-only">
+                {isTyping
+                  ? "Processing request..."
+                  : "Send the video URL for processing"}
+              </div>
             </div>
 
             <div className="p-4 border-t border-white/[0.05] flex items-center justify-between gap-4 pl-8">
@@ -422,8 +470,10 @@ export function BoxChat() {
                           setThumbnailEnabled(false);
                         }
                       }}
+                      aria-label="Select video quality option"
                     >
                       <SelectTrigger
+                        id="quality-select"
                         className="w-full bg-white/[0.05] border-none text-white/90 text-sm rounded-lg px-3 py-2 focus:ring-0 focus:outline-none cursor-pointer"
                         style={{
                           minWidth: 0,
@@ -467,8 +517,13 @@ export function BoxChat() {
                         id="audio-switch"
                         className="cursor-pointer"
                         checked={true}
+                        aria-label="Auto block sponsor segments"
+                        aria-describedby="sponsor-description"
                       />
-                      <span className="text-sm text-white/80">
+                      <span
+                        id="sponsor-description"
+                        className="text-sm text-white/80"
+                      >
                         Auto block sponsor
                       </span>
                     </div>
@@ -494,8 +549,11 @@ export function BoxChat() {
                         disabled={selectedOption === "audio-only"}
                         checked={thumbnailEnabled}
                         onCheckedChange={setThumbnailEnabled}
+                        aria-label="Auto import subtitles"
+                        aria-describedby="thumbnail-description"
                       />
                       <span
+                        id="thumbnail-description"
                         className={cn(
                           "text-sm",
                           selectedOption === "audio-only"
@@ -608,22 +666,4 @@ function ActionButton({ icon, label }: ActionButtonProps) {
       />
     </motion.button>
   );
-}
-
-const rippleKeyframes = `
-@keyframes ripple {
-  0% { transform: scale(0.5); opacity: 0.6; }
-  100% { transform: scale(2); opacity: 0; }
-}
-`;
-
-if (typeof document !== "undefined") {
-  // Check if the style already exists to prevent duplicates
-  const existingStyle = document.querySelector("style[data-ripple-keyframes]");
-  if (!existingStyle) {
-    const style = document.createElement("style");
-    style.setAttribute("data-ripple-keyframes", "true");
-    style.innerHTML = rippleKeyframes;
-    document.head.appendChild(style);
-  }
 }

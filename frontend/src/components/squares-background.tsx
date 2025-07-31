@@ -45,9 +45,6 @@ export function BackGround({
       numSquaresY.current = Math.ceil(canvas.height / squareSize) + 1;
     };
 
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
     const drawGrid = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClients";
 
 export default function AuthCallback() {
   const router = useRouter();
+  const isMounted = useRef(true);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -16,7 +17,9 @@ export default function AuthCallback() {
           console.error("Auth callback error:", error);
           // For mobile, redirect back to home
           if (!window.opener) {
-            router.push("/");
+            if (isMounted.current) {
+              router.push("/");
+            }
           } else {
             window.close();
           }
@@ -36,14 +39,18 @@ export default function AuthCallback() {
             window.close();
           } else {
             // Mobile redirect flow - redirect back to home
-            router.push("/");
+            if (isMounted.current) {
+              router.push("/");
+            }
           }
         } else {
           // No session found
           if (window.opener) {
             window.close();
           } else {
-            router.push("/");
+            if (isMounted.current) {
+              router.push("/");
+            }
           }
         }
       } catch (error) {
@@ -51,12 +58,19 @@ export default function AuthCallback() {
         if (window.opener) {
           window.close();
         } else {
-          router.push("/");
+          if (isMounted.current) {
+            router.push("/");
+          }
         }
       }
     };
 
     handleAuthCallback();
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      isMounted.current = false;
+    };
   }, [router]);
 
   return (
