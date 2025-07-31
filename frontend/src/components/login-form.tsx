@@ -30,41 +30,74 @@ export default function SignInModal({ trigger }: SignInModalProps) {
     setError(null);
 
     try {
-      // Open popup window
-      const popup = window.open(
-        `${window.location.origin}/auth/signin`,
-        "auth-popup",
-        "width=500,height=600,scrollbars=yes,resizable=yes"
-      );
+      // Check if it's a mobile device
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
 
-      if (!popup) {
-        setError("Please allow popups to sign in");
-        setLoading(false);
-        return;
+      if (isMobile) {
+        // Use direct OAuth for mobile devices
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            queryParams: {
+              access_type: "offline",
+              prompt: "consent",
+            },
+          },
+        });
+
+        if (error) {
+          console.error("Login error:", error.message);
+          setError(error.message);
+        } else {
+          // For mobile, we'll let the redirect handle the flow
+          console.log("Mobile sign in initiated");
+        }
+      } else {
+        // Use popup for desktop devices
+        const width = 400;
+        const height = 500;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+
+        const popup = window.open(
+          `${window.location.origin}/auth/signin`,
+          "auth-popup",
+          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+        );
+
+        if (!popup) {
+          setError("Please allow popups to sign in");
+          setLoading(false);
+          return;
+        }
+
+        // Listen for messages from the popup
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+
+          if (event.data.type === "AUTH_SUCCESS") {
+            // Authentication successful
+            setLoading(false);
+            setOpen(false);
+            window.removeEventListener("message", handleMessage);
+          }
+        };
+
+        window.addEventListener("message", handleMessage);
+
+        // Check if popup is closed
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            setLoading(false);
+            window.removeEventListener("message", handleMessage);
+          }
+        }, 1000);
       }
-
-      // Listen for messages from the popup
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-
-        if (event.data.type === "AUTH_SUCCESS") {
-          // Authentication successful
-          setLoading(false);
-          setOpen(false);
-          window.removeEventListener("message", handleMessage);
-        }
-      };
-
-      window.addEventListener("message", handleMessage);
-
-      // Check if popup is closed
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          setLoading(false);
-          window.removeEventListener("message", handleMessage);
-        }
-      }, 1000);
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred. Please try again.");
@@ -83,11 +116,11 @@ export default function SignInModal({ trigger }: SignInModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[80vh]">
         <div className="flex flex-col gap-2">
           <DialogTitle className="text-2xl font-semibold">Sign In</DialogTitle>
           {/* Terms and Conditions scroll area */}
-          <ScrollArea className="h-48 border rounded-md p-3 bg-muted/30 my-2">
+          <ScrollArea className="h-80 border rounded-md p-3 bg-muted/30 my-2">
             <div className="space-y-4 text-sm text-muted-foreground">
               {TERMS_TEXT.map((section, idx) => (
                 <div key={idx}>

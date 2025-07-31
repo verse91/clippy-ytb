@@ -14,7 +14,12 @@ export default function AuthCallback() {
 
         if (error) {
           console.error("Auth callback error:", error);
-          window.close();
+          // For mobile, redirect back to home
+          if (!window.opener) {
+            router.push("/");
+          } else {
+            window.close();
+          }
           return;
         }
 
@@ -22,27 +27,37 @@ export default function AuthCallback() {
           // Successfully authenticated
           console.log("Authentication successful");
 
-          // Close the popup and notify the parent window
           if (window.opener) {
+            // Popup flow - notify parent and close
             window.opener.postMessage(
               { type: "AUTH_SUCCESS" },
               window.location.origin
             );
+            window.close();
+          } else {
+            // Mobile redirect flow - redirect back to home
+            router.push("/");
           }
-
-          window.close();
         } else {
-          // No session found, close popup
-          window.close();
+          // No session found
+          if (window.opener) {
+            window.close();
+          } else {
+            router.push("/");
+          }
         }
       } catch (error) {
         console.error("Auth callback error:", error);
-        window.close();
+        if (window.opener) {
+          window.close();
+        } else {
+          router.push("/");
+        }
       }
     };
 
     handleAuthCallback();
-  }, []);
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
