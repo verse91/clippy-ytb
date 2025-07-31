@@ -10,6 +10,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
 } from "@/components/ui/navbar/resizable-navbar";
+import { BoxChat } from "@/components/homepage/box-chat";
 import { useState } from "react";
 
 export function NavbarMain() {
@@ -38,8 +39,23 @@ export function NavbarMain() {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="primary">Book a call</NavbarButton>
+            <NavbarButton
+              variant="secondary"
+            >
+              Login
+            </NavbarButton>
+            <NavbarButton
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Star it on GitHub ⭐"
+              href="https://github.com/verse91/clippy-ytb"
+              onClick={() => setIsMobileMenuOpen(false)}
+              variant="primary"
+              className="w-full flex items-center gap-2"
+            >
+              <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
+              Star on GitHub
+            </NavbarButton>
           </div>
         </NavBody>
 
@@ -76,17 +92,21 @@ export function NavbarMain() {
                 Login
               </NavbarButton>
               <NavbarButton
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Star it on GitHub ⭐"
+                href="https://github.com/verse91/clippy-ytb"
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
                 className="w-full"
               >
-                Book a call
+                Star on GitHub
               </NavbarButton>
             </div>
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-      {/* Navbar */}
+        {/* <BoxChat /> */}
     </div>
   );
 }
