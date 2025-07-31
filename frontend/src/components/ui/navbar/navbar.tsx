@@ -201,7 +201,6 @@ export function NavbarMain() {
                 <SignInModal
                   trigger={
                     <NavbarButton
-                      onClick={() => setIsMobileMenuOpen(false)}
                       variant="primary"
                       className="w-full"
                     >

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClients";
+import { useAuth } from "@/lib/auth-context";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ interface SignInModalProps {
 }
 
 export default function SignInModal({ trigger }: SignInModalProps) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -37,7 +39,7 @@ export default function SignInModal({ trigger }: SignInModalProps) {
         );
 
       if (isMobile) {
-        // Use direct OAuth for mobile devices
+        // For mobile, use a simpler approach without redirect
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
@@ -52,9 +54,12 @@ export default function SignInModal({ trigger }: SignInModalProps) {
         if (error) {
           console.error("Login error:", error.message);
           setError(error.message);
+          setLoading(false);
         } else {
-          // For mobile, we'll let the redirect handle the flow
+          // For mobile, we'll let the auth context handle the state
           console.log("Mobile sign in initiated");
+          // Keep loading state to prevent modal from closing too quickly
+          // The useEffect will handle closing the modal once user is authenticated
         }
       } else {
         // Use popup for desktop devices
@@ -105,13 +110,35 @@ export default function SignInModal({ trigger }: SignInModalProps) {
     }
   };
 
-  // Reset terms acceptance when modal closes
+  // Close modal when user is successfully authenticated
+  useEffect(() => {
+    if (user && open) {
+      // Add a small delay to prevent immediate closure on mobile
+      const timer = setTimeout(() => {
+        setLoading(false);
+        setOpen(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, open]);
+
+  // Reset error and loading when modal closes, but preserve terms acceptance for better UX
   useEffect(() => {
     if (!open) {
-      setAccepted(false);
       setError(null);
+      setLoading(false);
+      // Don't reset accepted state to improve mobile UX
+      // setAccepted(false);
     }
   }, [open]);
+
+  // Reset terms acceptance only when component unmounts or user changes
+  useEffect(() => {
+    if (!user) {
+      setAccepted(false);
+    }
+  }, [user]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
