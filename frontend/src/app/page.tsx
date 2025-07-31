@@ -1,7 +1,7 @@
 import { BackGround } from "@/components/squares-background";
 import ShinyText from "@/components/ui/texts/shiny-text";
 import { TextShimmerWave } from "@/components/ui/texts/text-wave";
-import Navbar from "@/components/navbar";
+import { NavbarMain } from "@/components/ui/navbar/navbar";
 import { BoxChat } from "@/components/homepage/box-chat";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
       </div>
 
       <div className="relative z-10">
-        <Navbar />
+        <NavbarMain />
         <div
           className="w-full h-full flex items-start justify-center pt-16 sm:pt-24 md:pt-32 lg:pt-48 px-4 sm:px-6 lg:px-8"
           style={{ fontFamily: "SF-Pro-Display, Arial, sans-serif" }}
