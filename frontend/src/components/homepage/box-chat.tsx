@@ -4,23 +4,8 @@ import { useEffect, useRef, useCallback, useTransition } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
-  ImageIcon,
-  FileUp,
-  Figma,
-  MonitorIcon,
-  CircleUserRound,
-  ArrowUpIcon,
-  Paperclip,
-  PlusIcon,
   SendIcon,
-  XIcon,
   LoaderIcon,
-  Sparkles,
-  Command,
-  Download,
-  Video,
-  Music,
-  Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
@@ -99,12 +84,6 @@ function useAutoResizeTextarea({
   return { textareaRef, adjustHeight };
 }
 
-interface CommandSuggestion {
-  icon: React.ReactNode;
-  label: string;
-  description: string;
-  prefix: string;
-}
 
 interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -174,16 +153,7 @@ export function BoxChat() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedOption, setSelectedOption] = useState("auto");
   const [thumbnailEnabled, setThumbnailEnabled] = useState(false);
-  const [attachments, setAttachments] = useState<string[]>([]);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<number | null>(
-    null
-  );
   const [isPending, startTransition] = useTransition();
-  const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [recentCommand, setRecentCommand] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const commandPaletteRef = useRef<HTMLDivElement>(null);
   const { textareaRef: autoResizeTextareaRef, adjustHeight } =
     useAutoResizeTextarea({
       minHeight: 60,
@@ -221,50 +191,7 @@ export function BoxChat() {
     };
   }, []);
 
-  const commandSuggestions: CommandSuggestion[] = [
-    {
-      icon: <Download className="w-4 h-4" />,
-      label: "Download Video",
-      description: "Download the full video",
-      prefix: "/download",
-    },
-    {
-      icon: <Video className="w-4 h-4" />,
-      label: "Extract Clip",
-      description: "Extract a specific time range",
-      prefix: "/clip",
-    },
-    {
-      icon: <Music className="w-4 h-4" />,
-      label: "Audio Only",
-      description: "Download audio only",
-      prefix: "/audio",
-    },
-    {
-      icon: <Clock className="w-4 h-4" />,
-      label: "Time Range",
-      description: "Set custom time range",
-      prefix: "/time",
-    },
-  ];
 
-  useEffect(() => {
-    if (value.startsWith("/") && !value.includes(" ")) {
-      setShowCommandPalette(true);
-
-      const matchingSuggestionIndex = commandSuggestions.findIndex((cmd) =>
-        cmd.prefix.startsWith(value)
-      );
-
-      if (matchingSuggestionIndex >= 0) {
-        setActiveSuggestion(matchingSuggestionIndex);
-      } else {
-        setActiveSuggestion(-1);
-      }
-    } else {
-      setShowCommandPalette(false);
-    }
-  }, [value]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -277,59 +204,7 @@ export function BoxChat() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      const commandButton = document.querySelector("[data-command-button]");
 
-      if (
-        commandPaletteRef.current &&
-        !commandPaletteRef.current.contains(target) &&
-        !commandButton?.contains(target)
-      ) {
-        setShowCommandPalette(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (showCommandPalette) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setActiveSuggestion((prev) =>
-          prev < commandSuggestions.length - 1 ? prev + 1 : 0
-        );
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setActiveSuggestion((prev) =>
-          prev > 0 ? prev - 1 : commandSuggestions.length - 1
-        );
-      } else if (e.key === "Tab" || e.key === "Enter") {
-        e.preventDefault();
-        if (activeSuggestion >= 0) {
-          const selectedCommand = commandSuggestions[activeSuggestion];
-          setValue(selectedCommand.prefix + " ");
-          setShowCommandPalette(false);
-
-          setRecentCommand(selectedCommand.label);
-          setTimeout(() => setRecentCommand(null), 3500);
-        }
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        setShowCommandPalette(false);
-      }
-    } else if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (value.trim()) {
-        handleSendMessage();
-      }
-    }
-  };
 
   const handleSendMessage = () => {
     if (value.trim()) {
@@ -342,24 +217,6 @@ export function BoxChat() {
         }, 2000);
       });
     }
-  };
-
-  const handleAttachFile = () => {
-    const mockFileName = `file-${Math.floor(Math.random() * 1000)}.pdf`;
-    setAttachments((prev) => [...prev, mockFileName]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const selectCommandSuggestion = (index: number) => {
-    const selectedCommand = commandSuggestions[index];
-    setValue(selectedCommand.prefix + " ");
-    setShowCommandPalette(false);
-
-    setRecentCommand(selectedCommand.label);
-    setTimeout(() => setRecentCommand(null), 2000);
   };
 
   return (
@@ -404,7 +261,6 @@ export function BoxChat() {
                   setValue(e.target.value);
                   adjustHeight();
                 }}
-                onKeyDown={handleKeyDown}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 placeholder="Paste video url here..."
