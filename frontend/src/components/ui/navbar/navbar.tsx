@@ -24,6 +24,7 @@ import { BoxChat } from "@/components/homepage/box-chat";
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import SmoothDrawer from "@/components/ui/subcription/smooth-drawer";
 
 export function NavbarMain() {
   const { user, signOut, loading } = useAuth();
@@ -78,6 +79,21 @@ export function NavbarMain() {
               </div>
             ) : user ? (
               <div className="flex items-center gap-3">
+                <SmoothDrawer
+                  isUserLoggedIn={true}
+                  userCredits={user.user_metadata?.credits || 0}
+                  trigger={
+                    <NavbarButton
+                      variant="secondary"
+                      className="flex items-center gap-2"
+                    >
+                      <i className="bx bxs-credit-card-alt text-sm"></i>
+                      {user.user_metadata?.credits
+                        ? `${user.user_metadata.credits} credits`
+                        : "Buy credits"}
+                    </NavbarButton>
+                  }
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <NavbarButton
@@ -107,10 +123,6 @@ export function NavbarMain() {
                     <DropdownMenuLabel className="text-xs text-muted-foreground -mt-3 mb-3">
                       {user.email}
                     </DropdownMenuLabel>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <i className="bx bxs-credit-card-alt text-sm text-white"></i>
-                      Buy credits
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer"
@@ -184,10 +196,18 @@ export function NavbarMain() {
                     </div>
                   </div>
                   <div className="border-t border-neutral-200 dark:border-neutral-700 pt-2">
-                    <button className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
-                      <i className="bx bxs-credit-card-alt text-sm mr-2"></i>
-                      Buy credits
-                    </button>
+                    <SmoothDrawer
+                      isUserLoggedIn={true}
+                      userCredits={user.user_metadata?.credits || 0}
+                      trigger={
+                        <button className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
+                          <i className="bx bxs-credit-card-alt text-sm mr-2"></i>
+                          {user.user_metadata?.credits
+                            ? `${user.user_metadata.credits} credits`
+                            : "Buy credits"}
+                        </button>
+                      }
+                    />
                     <button
                       className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
                       onClick={handleSignOut}
@@ -200,10 +220,7 @@ export function NavbarMain() {
               ) : (
                 <SignInModal
                   trigger={
-                    <NavbarButton
-                      variant="primary"
-                      className="w-full"
-                    >
+                    <NavbarButton variant="primary" className="w-full">
                       Sign in
                     </NavbarButton>
                   }
