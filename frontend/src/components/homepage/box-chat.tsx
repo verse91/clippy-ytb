@@ -451,11 +451,11 @@ export function BoxChat() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-white/[0.05] flex items-center justify-between gap-4 pl-8">
+            <div className="p-3 sm:p-4 border-t border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-6 sm:pl-8">
               <div className="flex flex-col gap-4 w-full">
                 {/* Quality Select */}
-                <div className="flex items-center gap-6 justify-start">
-                  <div className="flex flex-col gap-1 max-w-[220px]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 justify-start">
+                  <div className="flex flex-col gap-1 w-12/13 sm:max-w-[200px]">
                     <label
                       className="text-xs text-white/60 mb-1"
                       htmlFor="quality-select"
@@ -479,7 +479,6 @@ export function BoxChat() {
                           minWidth: 0,
                           width: "100%",
                           minHeight: 40,
-                          minInlineSize: "220px",
                         }}
                       >
                         <SelectValue />
@@ -503,7 +502,7 @@ export function BoxChat() {
                 </div>
 
                 {/* Audio and Subtitles Switches */}
-                <div className="flex items-center gap-6 justify-between">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-between">
                   {/* Audio Switch */}
                   <div className="flex flex-col gap-1 items-start min-w-[120px]">
                     <label
@@ -529,8 +528,8 @@ export function BoxChat() {
                     </div>
                   </div>
 
-                  {/* Subtitles Switch */}
-                  <div className="flex flex-col gap-1 items-start pr-4">
+                  {/* Thumbnail Switch - moved under SponsorBlock for mobile */}
+                  <div className="flex flex-col gap-1 items-start pr-4 sm:pr-4">
                     <label
                       className={cn(
                         "text-xs mb-1",
@@ -561,7 +560,7 @@ export function BoxChat() {
                             : "text-white/80"
                         )}
                       >
-                        Auto import subtitles
+                        Auto import thumbnail
                       </span>
                     </div>
                   </div>
