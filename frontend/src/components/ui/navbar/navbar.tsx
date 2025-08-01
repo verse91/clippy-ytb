@@ -69,11 +69,10 @@ export function NavbarMain() {
               rel="noopener noreferrer"
               title="Star it on GitHub ⭐"
               href="https://github.com/verse91/clippy-ytb"
-              variant="primary"
-              className="flex items-center gap-2"
+              variant="secondary"
+              className="flex items-center pr-1"
             >
-              <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
-              Star on GitHub
+              <i className="bxl bx-github text-4xl text-white transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
             </NavbarButton>
             {loading ? (
               <div className="p-3">
@@ -86,8 +85,8 @@ export function NavbarMain() {
                   userCredits={userCredits}
                   trigger={
                     <NavbarButton
-                      variant="secondary"
-                      className="flex items-center gap-2"
+                      variant="primary"
+                      className="flex items-center gap-2 mr-2"
                     >
                       <i className="bx bxs-credit-card-alt text-sm"></i>
                       {creditsLoading ? (
@@ -143,7 +142,7 @@ export function NavbarMain() {
             ) : (
               <SignInModal
                 trigger={
-                  <NavbarButton variant="secondary">Sign in</NavbarButton>
+                  <NavbarButton variant="primary">Sign in</NavbarButton>
                 }
               />
             )}
@@ -243,10 +242,10 @@ export function NavbarMain() {
                 href="https://github.com/verse91/clippy-ytb"
                 onClick={() => setIsMobileMenuOpen(false)}
                 variant="primary"
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 justify-center"
               >
                 <i className="bxl bx-github text-2xl text-black transition-all group-hover:text-gray-300 group-hover:scale-110"></i>
-                Star on GitHub
+                Star it on GitHub
               </NavbarButton>
             </div>
           </MobileNavMenu>
