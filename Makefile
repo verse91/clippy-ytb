@@ -25,7 +25,7 @@ b: #backend
 	@go run -C backend ./cmd/server
 
 f: #frontend
-	@cd frontend && bun run dev
+	@cd frontend && bun run net
 run:
 	@$(MAKE) -j2 b f
 
