@@ -3,10 +3,7 @@
 import { useEffect, useRef, useCallback, useTransition } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import {
-  SendIcon,
-  LoaderIcon,
-} from "lucide-react";
+import { SendIcon, LoaderIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
 import { Switch } from "@/components/ui/switch";
@@ -83,7 +80,6 @@ function useAutoResizeTextarea({
 
   return { textareaRef, adjustHeight };
 }
-
 
 interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -164,7 +160,6 @@ export function BoxChat() {
   const textareaRefToUse = autoResizeTextareaRef;
   const [isChecked, setIsChecked] = useState(true);
 
-
   // Inject ripple styles on client side only
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -191,8 +186,6 @@ export function BoxChat() {
     };
   }, []);
 
-
-
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -203,8 +196,6 @@ export function BoxChat() {
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
-
-
 
   const handleSendMessage = () => {
     if (value.trim()) {
@@ -454,12 +445,19 @@ export function BoxChat() {
           icon={<i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>}
           text={
             hasPlaylist(value) && isYouTubeUrl(value)
-              ? "We do not support to download full playlist"
+              ? "Playlist is not supported"
               : isYouTubeUrl(value)
               ? "Processing"
               : "This is not a Youtube video link"
           }
           showTypingDots={!hasPlaylist(value) && isYouTubeUrl(value)}
+          widthClassName={
+            hasPlaylist(value) && isYouTubeUrl(value)
+              ? "w-[44vw] max-w-md sm:w-auto sm:max-w-none"
+              : isYouTubeUrl(value)
+              ? ""
+              : "w-[53vw] max-w-md sm:w-auto sm:max-w-none"
+          }
         />
       ) : null}
 

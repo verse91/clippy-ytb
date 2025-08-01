@@ -9,6 +9,7 @@ interface TypingPopupProps {
   text?: string;
   className?: string;
   showTypingDots?: boolean;
+  widthClassName?: string;
 }
 
 // Typing dots animation component
@@ -40,6 +41,7 @@ export default function NotiPopup({
   text = "Processing...",
   className = "",
   showTypingDots = true,
+  widthClassName = "",
 }: TypingPopupProps) {
   return (
     <AnimatePresence>
@@ -47,7 +49,7 @@ export default function NotiPopup({
         <motion.div
           role="alert"
           aria-live="polite"
-          className={`fixed left-1/2 bottom-8 -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05] z-50 ${className}`}
+          className={`fixed left-1/2 bottom-8 -translate-x-1/2 backdrop-blur-2xl bg-white/[0.02] rounded-full px-4 py-2 shadow-lg border border-white/[0.05] z-50 ${widthClassName} ${className}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
