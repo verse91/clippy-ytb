@@ -184,7 +184,10 @@ export default function SmoothDrawer({
   trigger,
 }: DrawerDemoProps) {
   const [selectedOption, setSelectedOption] = React.useState<CreditOption>(
-    creditOptions.find((option) => option.popular) || creditOptions[1]
+    () => {
+      const popularOption = creditOptions.find((option) => option.popular);
+      return popularOption || creditOptions[0] || creditOptions[1];
+    }
   );
 
   const handleSecondaryClick = () => {
@@ -230,23 +233,19 @@ export default function SmoothDrawer({
                 </motion.span>
               </DrawerTitle>
               {isUserLoggedIn && (
-                <motion.div variants={itemVariants as any}>
-                </motion.div>
+                <motion.div variants={itemVariants as any}></motion.div>
               )}
               <motion.div variants={itemVariants as any}>
-                <div className="space-y-1.5">
+                <ul className="space-y-1.5">
                   {features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <i
-                        className="bx bx-check"
-                        style={{ color: "#0bff00", fontSize: "16px" }}
-                      ></i>
+                    <li key={index} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-green-500" />
                       <span className="text-xs text-zinc-600 dark:text-zinc-400 font-['SF-Pro-Display']">
                         {feature}
                       </span>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </motion.div>
             </DrawerHeader>
           </motion.div>
@@ -268,9 +267,11 @@ export default function SmoothDrawer({
             <DrawerFooter className="flex flex-col gap-2.5 px-0">
               <div className="w-full">
                 <Link
-                  href="#stripe"
+                  href="https://stripe.com"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="group w-full relative overflow-hidden inline-flex items-center justify-center h-10 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-xs font-semibold tracking-wide shadow-lg shadow-rose-500/20 transition-all duration-500 hover:shadow-xl hover:shadow-rose-500/30 hover:from-rose-600 hover:to-pink-600 dark:hover:from-rose-500 dark:hover:to-pink-500 font-['SF-Pro-Display']"
+                  aria-label={`Purchase ${selectedOption.credits} credits`}
                 >
                   <motion.span
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%]"

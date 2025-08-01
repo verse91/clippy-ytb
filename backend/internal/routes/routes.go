@@ -1,19 +1,48 @@
 package router
 
 import (
-	c "github.com/verse91/ytb-clipy/backend/internal/controller"
-
 	"github.com/gofiber/fiber/v3"
 	"github.com/supabase-community/supabase-go"
+	"github.com/verse91/ytb-clipy/backend/internal/controller"
+	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 )
 
 // SetupRoutes configures all API routes
 func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client) {
 	router.Get("/", homepageHandler)
-	// router.Post("/video", c.NewVideoController(videoRepo).VideoProcessHandler)
-	router.Post("/video/download", c.NewVideoController(supabaseClient).DownloadHandler)
-	router.Get("/userinfo/", c.NewUserController().GetUserById).Name("user")
-	router.Get("/user/", c.NewUserController().UserHandler).Name("user") // /?name=...&id=...&age=...
+
+	// User credit management routes with authentication
+	router.Get("/user/:userID/credits", middleware.UserAuthMiddleware, func(c fiber.Ctx) error {
+		userController := controller.NewUserController(supabaseClient)
+		return userController.GetUserCredits(c)
+	})
+
+	// Admin only routes for credit management
+	router.Post("/user/:userID/credits/update", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
+		userController := controller.NewUserController(supabaseClient)
+		return userController.UpdateUserCredits(c)
+	})
+
+	router.Post("/user/:userID/credits/add", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
+		userController := controller.NewUserController(supabaseClient)
+		return userController.AddUserCredits(c)
+	})
+
+	// Video routes
+	router.Post("/video/download", func(c fiber.Ctx) error {
+		videoController := controller.NewVideoController(supabaseClient)
+		return videoController.DownloadHandler(c)
+	})
+
+	router.Get("/userinfo/", func(c fiber.Ctx) error {
+		userController := controller.NewUserController(supabaseClient)
+		return userController.GetUserById(c)
+	})
+
+	router.Get("/user/", func(c fiber.Ctx) error {
+		userController := controller.NewUserController(supabaseClient)
+		return userController.UserHandler(c)
+	})
 }
 
 // Homepage handler

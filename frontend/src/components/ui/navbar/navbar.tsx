@@ -25,9 +25,11 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import SmoothDrawer from "@/components/ui/subcription/smooth-drawer";
+import { useUserCredits } from "@/lib/useUserCredits";
 
 export function NavbarMain() {
   const { user, signOut, loading } = useAuth();
+  const { userCredits, loading: creditsLoading } = useUserCredits(user?.id);
 
   const handleSignOut = async () => {
     try {
@@ -81,16 +83,20 @@ export function NavbarMain() {
               <div className="flex items-center gap-3">
                 <SmoothDrawer
                   isUserLoggedIn={true}
-                  userCredits={user.user_metadata?.credits || 0}
+                  userCredits={userCredits}
                   trigger={
                     <NavbarButton
                       variant="secondary"
                       className="flex items-center gap-2"
                     >
                       <i className="bx bxs-credit-card-alt text-sm"></i>
-                      {user.user_metadata?.credits
-                        ? `${user.user_metadata.credits} credits`
-                        : "Buy credits"}
+                      {creditsLoading ? (
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      ) : userCredits > 0 ? (
+                        `${userCredits} credits`
+                      ) : (
+                        "Buy credits"
+                      )}
                     </NavbarButton>
                   }
                 />
@@ -198,13 +204,17 @@ export function NavbarMain() {
                   <div className="border-t border-neutral-200 dark:border-neutral-700 pt-2">
                     <SmoothDrawer
                       isUserLoggedIn={true}
-                      userCredits={user.user_metadata?.credits || 0}
+                      userCredits={userCredits}
                       trigger={
                         <button className="w-full text-left px-2 py-1 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded">
                           <i className="bx bxs-credit-card-alt text-sm mr-2"></i>
-                          {user.user_metadata?.credits
-                            ? `${user.user_metadata.credits} credits`
-                            : "Buy credits"}
+                          {creditsLoading ? (
+                            <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin inline-block"></div>
+                          ) : userCredits > 0 ? (
+                            `${userCredits} credits`
+                          ) : (
+                            "Buy credits"
+                          )}
                         </button>
                       }
                     />
@@ -242,7 +252,6 @@ export function NavbarMain() {
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-      {/* <BoxChat /> */}
     </div>
   );
 }

@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/supabase-community/supabase-go"
 
@@ -47,6 +49,19 @@ func main() {
 	logger.InitLogger()
 
 	app := fiber.New()
+
+	// Add CORS middleware
+	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:3000,http://127.0.0.1:3000"
+	}
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: strings.Split(allowedOrigins, ","),
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "X-User-ID", "X-Admin-Key"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	}))
+
 	app.Use(middleware.RateLimitMiddleware)
 	v1 := app.Group("/api/v1")
 

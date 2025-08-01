@@ -3,7 +3,6 @@ import ShinyText from "@/components/ui/texts/shiny-text";
 import { TextShimmerWave } from "@/components/ui/texts/text-wave";
 import { NavbarMain } from "@/components/ui/navbar/navbar";
 import { BoxChat } from "@/components/homepage/box-chat";
-import SmoothDrawer from "@/components/ui/subcription/smooth-drawer";
 
 export default function Home() {
   return (
@@ -42,7 +41,6 @@ export default function Home() {
               /> */}
               <div className="flex w-full max-w-4xl overflow-x-hidden px-4 sm:px-6 lg:px-8">
                 <BoxChat />
-                <SmoothDrawer />
                 <div className="min-h-screen absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
                   <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse" />
                   <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full mix-blend-normal filter blur-[128px] animate-pulse delay-700" />
