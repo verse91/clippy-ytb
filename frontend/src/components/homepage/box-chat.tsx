@@ -173,7 +173,7 @@ export function BoxChat() {
   const [inputFocused, setInputFocused] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [selectedOption, setSelectedOption] = useState("auto");
-  const [thumbnailEnabled, setThumbnailEnabled] = useState(true);
+  const [thumbnailEnabled, setThumbnailEnabled] = useState(false);
   const [attachments, setAttachments] = useState<string[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState<number | null>(
     null
@@ -192,6 +192,8 @@ export function BoxChat() {
 
   // Use the auto-resize textarea ref
   const textareaRefToUse = autoResizeTextareaRef;
+  const [isChecked, setIsChecked] = useState(true);
+
 
   // Inject ripple styles on client side only
   useEffect(() => {
@@ -515,7 +517,8 @@ export function BoxChat() {
                       <Switch
                         id="audio-switch"
                         className="cursor-pointer"
-                        checked={true}
+                        checked={isChecked}
+                        onCheckedChange={setIsChecked}
                         aria-label="Auto block sponsor segments"
                         aria-describedby="sponsor-description"
                       />
