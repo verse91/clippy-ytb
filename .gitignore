@@ -72,10 +72,9 @@ frontend/yarn-*.log
 
 # ================== Backend (Go) ==================
 backend/bin/
-# backend/pkg/
+backend/pkg/logger/log
 backend/tmp/
 backend/.env*
-backend/log/
 backend/coverage/
 backend/*.test
 backend/go.sum

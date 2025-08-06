@@ -79,3 +79,65 @@ func (vr *VideoRepo) GetStatus(id string) (string, error) {
 	}
 	return status, nil
 }
+
+// Time Range Download Methods
+func (vr *VideoRepo) CreateTimeRangeDownloadRequest(id, videoURL string, startTime, endTime int) error {
+	// Validate time range parameters
+	if startTime < 0 || endTime < 0 {
+		return fmt.Errorf("start time and end time must be non-negative")
+	}
+	if startTime >= endTime {
+		return fmt.Errorf("start time must be less than end time")
+	}
+
+	data := map[string]interface{}{
+		"url":        videoURL,
+		"start_time": startTime,
+		"end_time":   endTime,
+		"status":     "processing",
+	}
+
+	_, _, err := vr.client.From("time_range_downloads").Insert(data, false, "", "", "").Execute()
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return fmt.Errorf("time range download already exists")
+		}
+		return fmt.Errorf("insert error: %s", err.Error())
+	}
+
+	return nil
+}
+
+func (vr *VideoRepo) UpdateTimeRangeDownloadStatus(id, status, message, outputFile string) error {
+	data := map[string]interface{}{
+		"status":      status,
+		"message":     message,
+		"output_file": outputFile,
+	}
+	_, _, err := vr.client.From("time_range_downloads").
+		Update(data, "", "").
+		Eq("id", id).
+		Execute()
+	if err != nil {
+		return fmt.Errorf("update error: %w", err)
+	}
+	return nil
+}
+
+func (vr *VideoRepo) GetTimeRangeDownloadStatus(id string) (map[string]interface{}, error) {
+	resp, _, err := vr.client.From("time_range_downloads").
+		Select("*", "", false).
+		Eq("id", id).
+		Single().
+		Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
