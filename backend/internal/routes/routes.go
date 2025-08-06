@@ -7,61 +7,49 @@ import (
 	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 )
 
-// SetupRoutes configures all API routes
 func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client) {
+	userController := controller.NewUserController(supabaseClient)
+	videoController := controller.NewVideoController(supabaseClient)
+
 	router.Get("/", homepageHandler)
 
-	// User credit management routes with authentication
 	router.Get("/user/:userID/credits", middleware.UserAuthMiddleware, func(c fiber.Ctx) error {
-		userController := controller.NewUserController(supabaseClient)
 		return userController.GetUserCredits(c)
 	})
 
-	// Admin only routes for credit management
 	router.Post("/user/:userID/credits/update", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
-		userController := controller.NewUserController(supabaseClient)
 		return userController.UpdateUserCredits(c)
 	})
 
 	router.Post("/user/:userID/credits/add", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
-		userController := controller.NewUserController(supabaseClient)
 		return userController.AddUserCredits(c)
 	})
 
-	// Video routes
 	router.Post("/video/download", func(c fiber.Ctx) error {
-		videoController := controller.NewVideoController(supabaseClient)
 		return videoController.DownloadHandler(c)
 	})
 
 	router.Get("/video/download/:id", func(c fiber.Ctx) error {
-		videoController := controller.NewVideoController(supabaseClient)
 		return videoController.GetDownloadStatus(c)
 	})
 
-	// Time range video routes
 	router.Post("/video/download/time-range", func(c fiber.Ctx) error {
-		videoController := controller.NewVideoController(supabaseClient)
 		return videoController.DownloadTimeRangeHandler(c)
 	})
 
 	router.Get("/video/download/time-range/:id", func(c fiber.Ctx) error {
-		videoController := controller.NewVideoController(supabaseClient)
 		return videoController.GetTimeRangeDownloadStatusHandler(c)
 	})
 
-	router.Get("/userinfo/", func(c fiber.Ctx) error {
-		userController := controller.NewUserController(supabaseClient)
+	router.Get("/user/info", func(c fiber.Ctx) error {
 		return userController.GetUserById(c)
 	})
 
-	router.Get("/user/", func(c fiber.Ctx) error {
-		userController := controller.NewUserController(supabaseClient)
+	router.Get("/user/profile", func(c fiber.Ctx) error {
 		return userController.UserHandler(c)
 	})
 }
 
-// Homepage handler
 func homepageHandler(c fiber.Ctx) error {
 	return c.SendString("Homepage")
 }
