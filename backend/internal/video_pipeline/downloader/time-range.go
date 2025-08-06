@@ -10,18 +10,27 @@ import (
 	"time"
 )
 
-func TimeRangeFHD(videoURL, begin, end string) {
-	start := time.Now()
-	fmt.Println("Begin, end:", begin, end)
 
-	// ../bin/yt-dlp.exe --no-playlist -f "bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best" -S "res:1080,+codec:avc1,+br" -o "%(title)s (%(height)sp, h264).%(ext)s" ""
+func TimeRangeFHD(videoURL string, begin, end int, downloadID string) error {
+	start := time.Now()
+    secondsToHHMMSS := func(sec int) string {
+        h := sec / 3600
+        m := (sec % 3600) / 60
+        s := sec % 60
+        return fmt.Sprintf("%02dh%02dm%02ds", h, m, s)
+    }
+    beginInt := secondsToHHMMSS(begin)
+    endInt := secondsToHHMMSS(end)
+	// fmt.Println("Begin, end:", begin, end)
+
+	// ../bin/yt-dlp.exe --no-playlist -f 'bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best'  -S 'res:1080,+codec:avc1,+br' --download-sections '*30-90' -o 'outputDir/%(title)s (%(height)sp, h264).%(ext)s' 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 	cmd_1080p := exec.Command(
 		ytDlpPath,
 		"--no-playlist",
 		"-f", `bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best`,
 		"-S", "res:1080,+codec:avc1,+br",
-		"--download-section", fmt.Sprintf("*%s-%s", begin, end),
-		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
+		"--download-section", fmt.Sprintf("*%d-%d", begin, end),
+		"-o", filepath.Join(outputDir, fmt.Sprintf("%%(title)s (%s-%s,%%(height)sp, h264).%%(ext)s", beginInt, endInt)),
 		videoURL,
 	)
 	var stdoutBuf bytes.Buffer
@@ -31,7 +40,7 @@ func TimeRangeFHD(videoURL, begin, end string) {
 
 	if err := cmd_1080p.Run(); err != nil {
 		fmt.Println("Fail:", err)
-		return
+		return err
 	}
 
 	// Combine both stdout and stderr for scanning, since yt-dlp may print to either
@@ -64,4 +73,5 @@ func TimeRangeFHD(videoURL, begin, end string) {
 		// fmt.Println("🎵 Video title:", title)
 	}
 	fmt.Println("Took:", time.Since(start))
+    return nil
 }

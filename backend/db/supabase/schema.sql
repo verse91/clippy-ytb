@@ -6,6 +6,17 @@ create table if not exists downloads (
   created_at timestamp default now()
 );
 
+create table if not exists time_range_downloads (
+  id uuid primary key default gen_random_uuid(),
+  url text not null,
+  start_time integer not null,
+  end_time integer not null,
+  status text default 'completed',
+  message text,
+  output_file text,
+  created_at timestamp default now()
+);
+
 -- Create profiles table to store user credits and email from auth.users
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,

@@ -79,3 +79,50 @@ func (vs *VideoService) GetDownloadStatus(downloadID string) (string, error) {
 
 	return status, nil
 }
+
+// Time Range Download Methods
+func (vs *VideoService) DownloadVideoTimeRange(videoURL string, startTime, endTime int) (string, error) {
+	validatedURL, err := vs.validateURL(videoURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid video URL: %w", err)
+	}
+
+	// Validate time range
+	if startTime < 0 || endTime <= startTime {
+		return "", fmt.Errorf("invalid time range: start_time must be >= 0 and end_time must be > start_time")
+	}
+
+	// Generate a temporary ID for tracking
+	tempID := uuid.New().String()
+
+	// Store the download request in repository
+	if err := vs.VideoRepo.CreateTimeRangeDownloadRequest(tempID, validatedURL, startTime, endTime); err != nil {
+		fmt.Printf("DownloadVideoTimeRange - CreateTimeRangeDownloadRequest error: %v\n", err)
+		return "", fmt.Errorf("failed to create time range download request: %w", err)
+	}
+
+	// Start async download and processing
+	go func() {
+		if err := downloader.TimeRangeFHD(validatedURL, startTime, endTime, tempID); err != nil {
+			// Update status in repository
+			vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, "failed", err.Error(), "")
+			return
+		}
+		vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, "completed", "", "")
+	}()
+
+	return tempID, nil
+}
+
+func (vs *VideoService) GetTimeRangeDownloadStatus(downloadID string) (map[string]interface{}, error) {
+	if downloadID == "" {
+		return nil, fmt.Errorf("download ID cannot be empty")
+	}
+
+	status, err := vs.VideoRepo.GetTimeRangeDownloadStatus(downloadID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get time range download status: %w", err)
+	}
+
+	return status, nil
+}

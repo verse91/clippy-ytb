@@ -34,6 +34,22 @@ func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client) {
 		return videoController.DownloadHandler(c)
 	})
 
+	router.Get("/video/download/:id", func(c fiber.Ctx) error {
+		videoController := controller.NewVideoController(supabaseClient)
+		return videoController.GetDownloadStatus(c)
+	})
+
+	// Time range video routes
+	router.Post("/video/download/time-range", func(c fiber.Ctx) error {
+		videoController := controller.NewVideoController(supabaseClient)
+		return videoController.DownloadTimeRangeHandler(c)
+	})
+
+	router.Get("/video/download/time-range/:id", func(c fiber.Ctx) error {
+		videoController := controller.NewVideoController(supabaseClient)
+		return videoController.GetTimeRangeDownloadStatusHandler(c)
+	})
+
 	router.Get("/userinfo/", func(c fiber.Ctx) error {
 		userController := controller.NewUserController(supabaseClient)
 		return userController.GetUserById(c)
