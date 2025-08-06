@@ -6,6 +6,8 @@ interface UseUserCreditsReturn {
   error: string | null;
   refetch: () => void;
 }
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 export const useUserCredits = (
   userId: string | undefined
@@ -14,8 +16,7 @@ export const useUserCredits = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+
 
   const fetchUserCredits = async () => {
     if (!userId) {
