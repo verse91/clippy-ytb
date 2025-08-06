@@ -82,17 +82,22 @@ func (vr *VideoRepo) GetStatus(id string) (string, error) {
 
 // Time Range Download Methods
 func (vr *VideoRepo) CreateTimeRangeDownloadRequest(id, videoURL string, startTime, endTime int) error {
+	// Validate time range parameters
+	if startTime < 0 || endTime < 0 {
+		return fmt.Errorf("start time and end time must be non-negative")
+	}
+	if startTime >= endTime {
+		return fmt.Errorf("start time must be less than end time")
+	}
+
 	data := map[string]interface{}{
-		"id":         id,
 		"url":        videoURL,
 		"start_time": startTime,
 		"end_time":   endTime,
 		"status":     "processing",
 	}
 
-	fmt.Printf("Creating time range download: %+v\n", data)
-
-	result, count, err := vr.client.From("time_range_downloads").Insert(data, false, "", "", "").Execute()
+	_, _, err := vr.client.From("time_range_downloads").Insert(data, false, "", "", "").Execute()
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			return fmt.Errorf("time range download already exists")
@@ -100,7 +105,6 @@ func (vr *VideoRepo) CreateTimeRangeDownloadRequest(id, videoURL string, startTi
 		return fmt.Errorf("insert error: %s", err.Error())
 	}
 
-	fmt.Printf("Time range download created - Result: %s, Count: %d\n", string(result), count)
 	return nil
 }
 
