@@ -5,11 +5,13 @@ import (
 
 	"github.com/verse91/ytb-clipy/backend/internal/repo"
 	"github.com/verse91/ytb-clipy/backend/internal/service"
+	"github.com/verse91/ytb-clipy/backend/pkg/logger"
 	"github.com/verse91/ytb-clipy/backend/pkg/response"
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/supabase-community/supabase-go"
+	"go.uber.org/zap"
 )
 
 type VideoController struct {
@@ -43,20 +45,32 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 	// fmt.Printf("Raw request body: %s\n", string(c.Body()))
 
 	if err := c.Bind().JSON(&req); err != nil {
-		fmt.Printf("JSON bind error: %v\n", err)
+		logger.Log.Error("JSON bind error in download request",
+			zap.Error(err),
+			zap.String("handler", "DownloadHandler"),
+		)
 		return response.ErrorResponse(c, response.ErrInvalidRequestBody, fmt.Sprintf("Invalid request body: %v", err))
 	}
 
-	fmt.Printf("Parsed request: %+v\n", req)
+	logger.Log.Info("Parsed download request",
+		zap.String("url", req.URL),
+		zap.String("handler", "DownloadHandler"),
+	)
 
 	if req.URL == "" {
-		fmt.Printf("URL is empty after parsing\n")
+		logger.Log.Warn("URL is empty after parsing",
+			zap.String("handler", "DownloadHandler"),
+		)
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
 	}
 
 	downloadID, err := vc.VideoService.DownloadFullVideo(req.URL)
 	if err != nil {
-		fmt.Printf("DownloadHandler error: %v\n", err)
+		logger.Log.Error("Failed to start download",
+			zap.Error(err),
+			zap.String("url", req.URL),
+			zap.String("handler", "DownloadHandler"),
+		)
 		return response.ErrorResponse(c, response.ErrDownloadStartFailed, "Failed to start download: "+err.Error())
 	}
 
@@ -103,11 +117,19 @@ func (vc *VideoController) DownloadTimeRangeHandler(c fiber.Ctx) error {
 	var req TimeRangeVideoRequest
 
 	if err := c.Bind().JSON(&req); err != nil {
-		fmt.Printf("JSON bind error: %v\n", err)
+		logger.Log.Error("JSON bind error in time range download request",
+			zap.Error(err),
+			zap.String("handler", "DownloadTimeRangeHandler"),
+		)
 		return response.ErrorResponse(c, response.ErrInvalidRequestBody, fmt.Sprintf("Invalid request body: %v", err))
 	}
 
-	fmt.Printf("Parsed time range request: %+v\n", req)
+	logger.Log.Info("Parsed time range download request",
+		zap.String("url", req.URL),
+		zap.Int("start_time", req.StartTime),
+		zap.Int("end_time", req.EndTime),
+		zap.String("handler", "DownloadTimeRangeHandler"),
+	)
 
 	if req.URL == "" {
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
@@ -119,7 +141,13 @@ func (vc *VideoController) DownloadTimeRangeHandler(c fiber.Ctx) error {
 
 	downloadID, err := vc.VideoService.DownloadVideoTimeRange(req.URL, req.StartTime, req.EndTime)
 	if err != nil {
-		fmt.Printf("DownloadTimeRangeHandler error: %v\n", err)
+		logger.Log.Error("Failed to start time range download",
+			zap.Error(err),
+			zap.String("url", req.URL),
+			zap.Int("start_time", req.StartTime),
+			zap.Int("end_time", req.EndTime),
+			zap.String("handler", "DownloadTimeRangeHandler"),
+		)
 		return response.ErrorResponse(c, response.ErrDownloadStartFailed, "Failed to start time range download: "+err.Error())
 	}
 
