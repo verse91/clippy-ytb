@@ -36,7 +36,6 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 	// fmt.Printf("Request headers: %+v\n", c.GetReqHeaders())
 	// fmt.Printf("Raw request body: %s\n", string(c.Body()))
 
-
 	if err := c.Bind().JSON(&req); err != nil {
 		fmt.Printf("JSON bind error: %v\n", err)
 		return response.ErrorResponse(c, response.ErrInvalidRequestBody, fmt.Sprintf("Invalid request body: %v", err))
@@ -49,7 +48,7 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
 	}
 
-	downloadID, err := vc.VideoService.DownloadVideo(req.URL)
+	downloadID, err := vc.VideoService.DownloadFullVideo(req.URL)
 	if err != nil {
 		fmt.Printf("DownloadHandler error: %v\n", err)
 		return response.ErrorResponse(c, response.ErrDownloadStartFailed, "Failed to start download: "+err.Error())

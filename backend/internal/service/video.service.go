@@ -39,7 +39,7 @@ func (vs *VideoService) validateURL(videoURL string) (string, error) {
 	return parsedURL.String(), nil
 }
 
-func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
+func (vs *VideoService) DownloadFullVideo(videoURL string) (string, error) {
 	validatedURL, err := vs.validateURL(videoURL)
 	if err != nil {
 		return "", fmt.Errorf("invalid video URL: %w", err)
@@ -50,7 +50,6 @@ func (vs *VideoService) DownloadVideo(videoURL string) (string, error) {
 
 	// Store the download request in repository
 	if err := vs.VideoRepo.CreateDownloadRequest(tempID, validatedURL); err != nil {
-		// In ra lỗi chi tiết
 		fmt.Printf("DownloadVideo - CreateDownloadRequest error: %v\n", err)
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}

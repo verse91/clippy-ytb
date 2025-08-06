@@ -141,9 +141,7 @@ export function NavbarMain() {
               </div>
             ) : (
               <SignInModal
-                trigger={
-                  <NavbarButton variant="primary">Sign in</NavbarButton>
-                }
+                trigger={<NavbarButton variant="primary">Sign in</NavbarButton>}
               />
             )}
           </div>
