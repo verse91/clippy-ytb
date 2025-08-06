@@ -20,11 +20,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Failed to get initial session:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getSession();
@@ -41,24 +47,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+      throw error; // Re-throw to allow caller to handle
+    }
   };
 
   const getUserCredits = async (userId: string): Promise<number> => {
+    if (!userId?.trim()) {
+      console.error("Invalid userId provided");
+      return 0;
+    }
     try {
-      const response = await fetch(`/api/v1/users/${userId}/credits`, {
-        headers: {
-          "X-User-ID": userId,
-        },
-      });
+      const response = await fetch(`/api/v1/users/${userId}/credits`);
 
       if (!response.ok) {
-        console.error("Failed to fetch user credits");
+        console.error(`Failed to fetch user credits: ${response.status} ${response.statusText}`);
         return 0;
       }
 
       const data = await response.json();
-      return data.data?.credits || 0;
+      return typeof data.credits === 'number' ? data.credits : (data.data?.credits || 0);
     } catch (error) {
       console.error("Error fetching user credits:", error);
       return 0;
