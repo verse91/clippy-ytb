@@ -61,6 +61,12 @@ func (uc *UserController) GetUserCredits(c fiber.Ctx) error {
 
 // UpdateUserCredits sets the credit balance for a user (admin only)
 func (uc *UserController) UpdateUserCredits(c fiber.Ctx) error {
+	// Additional authorization check - verify admin key is present
+	adminKey := c.Get("X-Admin-Key")
+	if adminKey == "" {
+		return response.ErrorResponse(c, 401, "Admin authentication required")
+	}
+
 	userID := c.Params("userID")
 	if userID == "" {
 		return response.ErrorResponse(c, 400, "User ID is required")
