@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useCallback } from "react";
 interface UseUserCreditsReturn {
   userCredits: number;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 export const useUserCredits = (
   userId: string | undefined
@@ -16,9 +15,8 @@ export const useUserCredits = (
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
-
-  const fetchUserCredits = async () => {
+  // Memoize fetchUserCredits with useCallback and correct dependencies
+  const fetchUserCredits = useCallback(async () => {
     if (!userId) {
       setUserCredits(0);
       setError(null);
@@ -33,14 +31,26 @@ export const useUserCredits = (
         `${API_BASE_URL}/api/v1/user/${userId}/credits`,
         {
           headers: {
-            "X-User-ID": userId,
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        setUserCredits(data.data?.credits || 0);
+        // Validate the expected data structure before accessing credits
+        if (
+          data &&
+          typeof data === "object" &&
+          data.data &&
+          typeof data.data === "object" &&
+          typeof data.data.credits === "number"
+        ) {
+          setUserCredits(data.data.credits);
+        } else {
+          setUserCredits(0);
+          setError("Unexpected response structure when fetching user credits.");
+        }
       } else {
         const errorMessage = `Failed to fetch user credits: ${response.status}`;
         console.error(errorMessage);
@@ -57,11 +67,12 @@ export const useUserCredits = (
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, API_BASE_URL]);
 
+  // Add fetchUserCredits to the dependency array
   useEffect(() => {
     fetchUserCredits();
-  }, [userId]);
+  }, [fetchUserCredits]);
 
   return {
     userCredits,
