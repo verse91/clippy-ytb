@@ -6,16 +6,16 @@ import (
 )
 
 type Config struct {
-    DBUrl string
+	DBUrl string
 }
 
 func LoadConfig() *Config {
-    db_url := utils.GetEnv("SUPABASE_DB_URL", "")
-    if db_url == "" {
-        logger.Log.Error("SUPABASE_DB_URL is not set")
-        return nil
-    }
-    return &Config{
-        DBUrl: db_url,
-    }
+	db_url := utils.GetEnv("SUPABASE_DB_URL", "")
+	if db_url == "" {
+		logger.Log.Error("SUPABASE_DB_URL is not set")
+		return nil
+	}
+	return &Config{
+		DBUrl: db_url,
+	}
 }

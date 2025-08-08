@@ -25,10 +25,10 @@ func NewUserController(supabaseClient *supabase.Client) *UserController {
 	}
 }
 
-func (uc *UserController) UserHandler(c fiber.Ctx) error {
+func (uc *UserController) UserHandler(c *fiber.Ctx) error {
 	p := new(Person)
 
-	if err := c.Bind().Query(p); err != nil {
+	if err := (*c).Bind().Query(p); err != nil {
 		return err
 	}
 
@@ -38,56 +38,56 @@ func (uc *UserController) UserHandler(c fiber.Ctx) error {
 		"age":     p.Age,
 	}
 
-	return c.Status(fiber.StatusOK).JSON(data)
+	return (*c).Status(fiber.StatusOK).JSON(data)
 }
 
 // GetUserCredits returns the current credit balance for a user
-func (uc *UserController) GetUserCredits(c fiber.Ctx) error {
-	userID := c.Params("userID")
+func (uc *UserController) GetUserCredits(c *fiber.Ctx) error {
+	userID := (*c).Params("userID")
 	if userID == "" {
-		return response.ErrorResponse(c, 400, "User ID is required")
+		return response.ErrorResponse(*c, 400, "User ID is required")
 	}
 
 	credits, err := uc.UserService.GetUserCredits(userID)
 	if err != nil {
-		return response.ErrorResponse(c, 500, "Failed to get user credits")
+		return response.ErrorResponse(*c, 500, "Failed to get user credits")
 	}
 
-	return response.SuccessResponse(c, response.SuccessCode, fiber.Map{
+	return response.SuccessResponse(*c, response.SuccessCode, fiber.Map{
 		"user_id": userID,
 		"credits": credits,
 	})
 }
 
 // UpdateUserCredits sets the credit balance for a user (admin only)
-func (uc *UserController) UpdateUserCredits(c fiber.Ctx) error {
+func (uc *UserController) UpdateUserCredits(c *fiber.Ctx) error {
 	// Additional authorization check - verify admin key is present
-	adminKey := c.Get("X-Admin-Key")
+	adminKey := (*c).Get("X-Admin-Key")
 	if adminKey == "" {
-		return response.ErrorResponse(c, 401, "Admin authentication required")
+		return response.ErrorResponse(*c, 401, "Admin authentication required")
 	}
 
-	userID := c.Params("userID")
+	userID := (*c).Params("userID")
 	if userID == "" {
-		return response.ErrorResponse(c, 400, "User ID is required")
+		return response.ErrorResponse(*c, 400, "User ID is required")
 	}
 
-	creditsStr := c.FormValue("credits")
+	creditsStr := (*c).FormValue("credits")
 	credits, err := strconv.Atoi(creditsStr)
 	if err != nil {
-		return response.ErrorResponse(c, 400, "Invalid credits value")
+		return response.ErrorResponse(*c, 400, "Invalid credits value")
 	}
 
 	if credits < 0 {
-		return response.ErrorResponse(c, 400, "Credits cannot be negative")
+		return response.ErrorResponse(*c, 400, "Credits cannot be negative")
 	}
 
 	err = uc.UserService.UpdateUserCredits(userID, credits)
 	if err != nil {
-		return response.ErrorResponse(c, 500, "Failed to update user credits")
+		return response.ErrorResponse(*c, 500, "Failed to update user credits")
 	}
 
-	return response.SuccessResponse(c, response.SuccessCode, fiber.Map{
+	return response.SuccessResponse(*c, response.SuccessCode, fiber.Map{
 		"user_id": userID,
 		"credits": credits,
 		"message": "Credits updated successfully",
@@ -95,28 +95,28 @@ func (uc *UserController) UpdateUserCredits(c fiber.Ctx) error {
 }
 
 // AddUserCredits adds credits to a user's balance
-func (uc *UserController) AddUserCredits(c fiber.Ctx) error {
-	userID := c.Params("userID")
+func (uc *UserController) AddUserCredits(c *fiber.Ctx) error {
+	userID := (*c).Params("userID")
 	if userID == "" {
-		return response.ErrorResponse(c, 400, "User ID is required")
+		return response.ErrorResponse(*c, 400, "User ID is required")
 	}
 
-	creditsStr := c.FormValue("credits")
+	creditsStr := (*c).FormValue("credits")
 	credits, err := strconv.Atoi(creditsStr)
 	if err != nil {
-		return response.ErrorResponse(c, 400, "Invalid credits value")
+		return response.ErrorResponse(*c, 400, "Invalid credits value")
 	}
 
 	if credits <= 0 {
-		return response.ErrorResponse(c, 400, "Credits must be positive")
+		return response.ErrorResponse(*c, 400, "Credits must be positive")
 	}
 
 	err = uc.UserService.AddUserCredits(userID, credits)
 	if err != nil {
-		return response.ErrorResponse(c, 500, "Failed to add user credits")
+		return response.ErrorResponse(*c, 500, "Failed to add user credits")
 	}
 
-	return response.SuccessResponse(c, response.SuccessCode, fiber.Map{
+	return response.SuccessResponse(*c, response.SuccessCode, fiber.Map{
 		"user_id":       userID,
 		"credits_added": credits,
 		"message":       "Credits added successfully",
@@ -124,9 +124,9 @@ func (uc *UserController) AddUserCredits(c fiber.Ctx) error {
 }
 
 // controller -> service -> repo -> models -> database
-func (uc *UserController) GetUserById(c fiber.Ctx) error {
+func (uc *UserController) GetUserById(c *fiber.Ctx) error {
 	// if err := someFunctionThatMightFail(); err != nil {
-	// 	return response.ErrorResponse(c, 200003, "not neccessary")
+	// 	return response.ErrorResponse(*c, 200003, "not neccessary")
 	// }
-	return response.SuccessResponse(c, response.SuccessCode, []string{"abc"})
+	return response.SuccessResponse(*c, response.SuccessCode, []string{"abc"})
 }
