@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"time"
-	log "github.com/verse91/ytb-clipy/backend/pkg/logger"
+
 	"github.com/verse91/ytb-clipy/backend/internal/config"
+	log "github.com/verse91/ytb-clipy/backend/pkg/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,24 +24,26 @@ func InitDB() error {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	DB = db
+
 	// https://gorm.io/docs/generic_interface.html#Connection-Pool
 	sqlDB, err := db.DB()
-    if err != nil {
-        return fmt.Errorf("error getting sql.db: %w", err)
-    }
+	if err != nil {
+		return fmt.Errorf("error getting sql.db: %w", err)
+	}
 
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(50)
 	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    if err := sqlDB.PingContext(ctx); err != nil {
-        sqlDB.Close()
-        return fmt.Errorf("failed to ping database: %w", err)
-    }
-    log.Log.Info("Database connected successfully")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := sqlDB.PingContext(ctx); err != nil {
+		sqlDB.Close()
+		return fmt.Errorf("failed to ping database: %w", err)
+	}
+	log.Log.Info("Database connected successfully")
 
 	return nil
 }

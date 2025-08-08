@@ -14,6 +14,8 @@ import (
 	// "log"
 	// "fmt"
 	// "github.com/goccy/go-json"
+	"github.com/verse91/ytb-clipy/backend/db"
+	"github.com/verse91/ytb-clipy/backend/db/migrations"
 	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 	router "github.com/verse91/ytb-clipy/backend/internal/routes"
 	"github.com/verse91/ytb-clipy/backend/pkg/logger"
@@ -49,11 +51,20 @@ func main() {
 	}
 	logger.InitLogger()
 
+	// Initialize database and run migrations
+	if err := db.InitDB(); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
+	// Run database migrations
+	if err := migrations.RunDatabaseMigrations(); err != nil {
+		log.Printf("Warning: Database migrations failed: %v", err)
+	}
+
 	app := fiber.New()
 
 	// Add CORS middleware
-    allowedOrigins := utils.GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
-
+	allowedOrigins := utils.GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Split(allowedOrigins, ","),

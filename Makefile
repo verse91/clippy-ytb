@@ -26,6 +26,10 @@ b: #backend
 
 f: #frontend
 	@cd frontend && bun run net
+
+testdb: #test database
+	@go run -C backend ./cmd/test
+
 run:
 	@$(MAKE) -j2 b f
 

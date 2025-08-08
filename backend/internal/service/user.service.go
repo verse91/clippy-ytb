@@ -5,14 +5,8 @@ import (
 	"fmt"
 
 	"github.com/supabase-community/supabase-go"
+	"github.com/verse91/ytb-clipy/backend/internal/model"
 )
-
-// UserProfile represents a user profile from the database
-type UserProfile struct {
-	ID      string `json:"id"`
-	Email   string `json:"email"`
-	Credits int    `json:"credits"`
-}
 
 type UserService struct {
 	supabaseClient *supabase.Client
@@ -35,7 +29,7 @@ func (us *UserService) GetUserCredits(userID string) (int, error) {
 		return 0, fmt.Errorf("user profile not found: %w", err)
 	}
 
-	var profile UserProfile
+	var profile model.UserProfile
 	if err := json.Unmarshal(resp, &profile); err != nil {
 		return 0, fmt.Errorf("failed to parse response: %w", err)
 	}
