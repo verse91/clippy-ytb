@@ -36,8 +36,8 @@ func InitLogger() {
 	core := zapcore.NewCore(encoder, writerSync, zapcore.InfoLevel)
 	Log = zap.New(core, zap.AddCaller())
 
-	Log.Info("Info log", zap.Int("line", 1))
-	Log.Error("Error log", zap.Int("line", 2))
+	// Log.Info("Info log", zap.Int("line", 1))
+	// Log.Error("Error log", zap.Int("line", 2))
 
 }
 
