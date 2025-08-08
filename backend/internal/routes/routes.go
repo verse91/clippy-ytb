@@ -15,15 +15,15 @@ func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client, config *c
 	router.Get("/", homepageHandler)
 
 	router.Get("/user/:userID/credits", middleware.UserAuthMiddleware, func(c fiber.Ctx) error {
-		return userController.GetUserCredits(&c)
+		return userController.GetUserCredits(c)
 	})
 
 	router.Post("/user/:userID/credits/update", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
-		return userController.UpdateUserCredits(&c)
+		return userController.UpdateUserCredits(c)
 	})
 
 	router.Post("/user/:userID/credits/add", middleware.AdminAuthMiddleware, func(c fiber.Ctx) error {
-		return userController.AddUserCredits(&c)
+		return userController.AddUserCredits(c)
 	})
 
 	router.Post("/video/download", func(c fiber.Ctx) error {
@@ -43,11 +43,11 @@ func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client, config *c
 	})
 
 	router.Get("/user/info", func(c fiber.Ctx) error {
-		return userController.GetUserById(&c)
+		return userController.GetUserById(c)
 	})
 
 	router.Get("/user/profile", func(c fiber.Ctx) error {
-		return userController.UserHandler(&c)
+		return userController.UserHandler(c)
 	})
 }
 
