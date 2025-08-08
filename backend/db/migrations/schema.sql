@@ -39,24 +39,33 @@ create trigger set_updated_at_downloads
   before update on public.downloads
   for each row execute procedure public.set_updated_at();
 
-create table if not exists time_range_downloads (
+-- Drop any existing trigger on time_range_downloads table
+drop trigger if exists set_updated_at_time_range_downloads on public.time_range_downloads;
+
+create table if not exists public.time_range_downloads (
   id uuid primary key default gen_random_uuid(),
   url text not null,
   start_time integer not null,
-  end_time integer not null,
-  status text default 'completed',
+  end_time integer not null check (end_time >= start_time),
+  status text default 'pending',
   message text,
   output_file text,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
 
+-- Create trigger to automatically update updated_at on row updates
+create trigger set_updated_at_time_range_downloads
+  before update on public.time_range_downloads
+  for each row execute procedure public.set_updated_at();
+
 -- Create profiles table to store user credits and email from auth.users
-create table profiles (
+create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text unique,
-  credits integer default 0 check (credits >= 0),
+  credits integer not null default 0 check (credits >= 0),
   -- additional optional fields can be added here as needed
-  created_at timestamptz default now()
+  created_at timestamptz not null default now()
 );
 
 -- Enable Row Level Security
