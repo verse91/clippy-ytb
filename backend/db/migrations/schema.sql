@@ -71,10 +71,28 @@ create table if not exists profiles (
 -- Enable Row Level Security
 alter table profiles enable row level security;
 
--- Create policies
-create policy "Users can view own profile" on profiles for select using (auth.uid() = id);
-create policy "Users can update own profile" on profiles for update using (auth.uid() = id)
-  with check (auth.uid() = id and credits = (select credits from profiles where id = auth.uid()));
+-- Create policies with idempotent checks and proper role scoping
+DO $$
+BEGIN
+  -- Drop existing policies if they exist
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'profiles' AND policyname = 'Users can view own profile') THEN
+    DROP POLICY "Users can view own profile" ON profiles;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'profiles' AND policyname = 'Users can update own profile') THEN
+    DROP POLICY "Users can update own profile" ON profiles;
+  END IF;
+
+  -- Create policies with proper role scoping and NULL-safe comparison
+  CREATE POLICY "Users can view own profile" ON profiles
+    FOR SELECT TO authenticated
+    USING (auth.uid() = id);
+
+  CREATE POLICY "Users can update own profile" ON profiles
+    FOR UPDATE TO authenticated
+    USING (auth.uid() = id)
+    WITH CHECK (auth.uid() = id AND credits IS NOT DISTINCT FROM (SELECT credits FROM profiles WHERE id = auth.uid()));
+END $$;
 
 -- Create function to handle new user signup, copying email from auth.users
 create or replace function public.handle_new_user()
