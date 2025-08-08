@@ -1,8 +1,17 @@
 -- Paste this into your Supabase sql editor
 
-
 -- Enable pgcrypto extension for gen_random_uuid()
 create extension if not exists pgcrypto;
+
+-- Create schema_version table to track database schema versions
+create table if not exists schema_version (
+  id serial primary key,
+  version integer not null,
+  applied_at timestamptz default now()
+);
+
+-- Insert initial schema version
+insert into schema_version (version) values (1) on conflict do nothing;
 
 create table if not exists downloads (
   id uuid primary key default gen_random_uuid(),
