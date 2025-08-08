@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -13,6 +14,9 @@ type VideoRepo struct {
 }
 
 func NewVideoRepo(supaClient *supabase.Client) *VideoRepo {
+	if supaClient == nil {
+		panic("supabase client cannot be nil")
+	}
 	return &VideoRepo{
 		client: supaClient,
 	}
@@ -114,12 +118,15 @@ func (vr *VideoRepo) UpdateTimeRangeDownloadStatus(id, status, message, outputFi
 		"message":     message,
 		"output_file": outputFile,
 	}
-	_, _, err := vr.client.From("time_range_downloads").
+	_, count, err := vr.client.From("time_range_downloads").
 		Update(data, "", "").
 		Eq("id", id).
 		Execute()
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
+	}
+	if count == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }
