@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/verse91/ytb-clipy/backend/db"
-    "github.com/verse91/ytb-clipy/backend/pkg/logger"
-    "go.uber.org/zap"
+	"github.com/verse91/ytb-clipy/backend/pkg/logger"
+	"go.uber.org/zap"
 )
 
 func RunDatabaseMigrations() error {
