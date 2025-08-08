@@ -17,6 +17,7 @@ import (
 	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 	router "github.com/verse91/ytb-clipy/backend/internal/routes"
 	"github.com/verse91/ytb-clipy/backend/pkg/logger"
+	"github.com/verse91/ytb-clipy/backend/pkg/utils"
 )
 
 // type RedirectConfig struct {
@@ -51,10 +52,8 @@ func main() {
 	app := fiber.New()
 
 	// Add CORS middleware
-	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:3000,http://127.0.0.1:3000"
-	}
+    allowedOrigins := utils.GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Split(allowedOrigins, ","),
@@ -73,7 +72,7 @@ func main() {
 
 	go middleware.CleanupClients(ctx)
 
-	if err := app.Listen(":" + os.Getenv("BACKEND_PORT")); err != nil {
+	if err := app.Listen(":" + utils.GetEnv("BACKEND_PORT", "8080")); err != nil {
 		cancel()
 		panic(err)
 	}

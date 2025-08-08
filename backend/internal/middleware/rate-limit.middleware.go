@@ -32,7 +32,7 @@ var (
 )
 
 func getEnvAsInt(name string, defaultVal int) int {
-	if valStr := os.Getenv(name); valStr != "" {
+	if valStr, exists := os.LookupEnv(name); exists {
 		if val, err := strconv.Atoi(valStr); err == nil {
 			return val
 		}
@@ -41,7 +41,7 @@ func getEnvAsInt(name string, defaultVal int) int {
 }
 
 func getEnvAsFloat(name string, defaultVal float64) float64 {
-	if valStr := os.Getenv(name); valStr != "" {
+	if valStr, exists := os.LookupEnv(name); exists {
 		if val, err := strconv.ParseFloat(valStr, 64); err == nil {
 			return val
 		}

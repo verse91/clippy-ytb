@@ -3,12 +3,12 @@ package middleware
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/verse91/ytb-clipy/backend/pkg/response"
+	"github.com/verse91/ytb-clipy/backend/pkg/utils"
 )
 
 // APIKeyMiddleware validates API key for general API access
@@ -18,7 +18,7 @@ func APIKeyMiddleware(c fiber.Ctx) error {
 		return response.ErrorResponse(c, 401, "API Key is missing")
 	}
 
-	expectedAPIKey := os.Getenv("USER_API_KEY")
+	expectedAPIKey := utils.GetEnv("USER_API_KEY", "")
 	if expectedAPIKey == "" {
 		return response.ErrorResponse(c, 500, "USER_API_KEY environment variable not configured")
 	}
@@ -38,7 +38,7 @@ func AdminAuthMiddleware(c fiber.Ctx) error {
 	}
 
 	// Get admin key from environment variable
-	expectedAdminKey := os.Getenv("ADMIN_SECRET_KEY")
+	expectedAdminKey := utils.GetEnv("ADMIN_SECRET_KEY", "")
 	if expectedAdminKey == "" {
 		return response.ErrorResponse(c, 500, "Admin secret key not configured")
 	}
@@ -72,7 +72,7 @@ func UserAuthMiddleware(c fiber.Ctx) error {
 	tokenString := tokenParts[1]
 
 	// Get JWT secret from environment
-	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtSecret := utils.GetEnv("JWT_SECRET", "")
 	if jwtSecret == "" {
 		return response.ErrorResponse(c, 500, "JWT secret not configured")
 	}
