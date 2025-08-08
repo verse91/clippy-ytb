@@ -2,40 +2,80 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"net/url"
+	"strings"
 
 	"github.com/google/uuid"
-	"github.com/verse91/ytb-clipy/backend/internal/repo"
 	"github.com/verse91/ytb-clipy/backend/internal/video_pipeline/downloader"
 )
 
-type VideoService struct {
-	VideoRepo *repo.VideoRepo
+// Status constants for download operations
+const (
+	StatusPending   = "pending"
+	StatusCompleted = "completed"
+	StatusFailed    = "failed"
+)
+
+// Validation constants
+const (
+	MaxClipDurationSeconds = 3600 // 1 hour maximum clip duration
+)
+
+// VideoRepository interface defines the contract for video repository operations
+type VideoRepository interface {
+	CreateDownloadRequest(id, url string) error
+	UpdateDownloadStatus(id, status, errorMsg string) error
+	GetStatus(id string) (string, error)
+	CreateTimeRangeDownloadRequest(id, url string, startSec, endSec int) error
+	UpdateTimeRangeDownloadStatus(id, status, errorMsg, outputPath string) error
+	GetTimeRangeDownloadStatus(id string) (map[string]interface{}, error)
 }
 
-func NewVideoService(videoRepo *repo.VideoRepo) *VideoService {
+type VideoService struct {
+	VideoRepo VideoRepository
+}
+
+func NewVideoService(videoRepo VideoRepository) *VideoService {
+	if videoRepo == nil {
+		log.Fatal("VideoRepository cannot be nil")
+	}
 	return &VideoService{
 		VideoRepo: videoRepo,
 	}
 }
+
 func (vs *VideoService) validateURL(videoURL string) (string, error) {
 	if videoURL == "" {
 		return "", fmt.Errorf("video URL cannot be empty")
 	}
+
+	// Trim whitespace from input
+	videoURL = strings.TrimSpace(videoURL)
 
 	parsedURL, err := url.Parse(videoURL)
 	if err != nil {
 		return "", fmt.Errorf("invalid video URL format: %w", err)
 	}
 
-	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		// If no scheme, prepend https:// and re-parse
+	// Check if URL has a scheme
+	if parsedURL.Scheme == "" {
+		// No scheme provided, prepend https://
 		videoURL = "https://" + videoURL
 		parsedURL, err = url.Parse(videoURL)
 		if err != nil {
 			return "", fmt.Errorf("invalid video URL format after adding https: %w", err)
 		}
+	} else if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		// Reject URLs with unsupported schemes
+		return "", fmt.Errorf("unsupported URL scheme: %s. Only http and https are supported", parsedURL.Scheme)
 	}
+
+	// Ensure the URL has a non-empty host
+	if parsedURL.Host == "" {
+		return "", fmt.Errorf("invalid URL: missing host")
+	}
+
 	return parsedURL.String(), nil
 }
 
@@ -50,18 +90,22 @@ func (vs *VideoService) DownloadFullVideo(videoURL string) (string, error) {
 
 	// Store the download request in repository
 	if err := vs.VideoRepo.CreateDownloadRequest(tempID, validatedURL); err != nil {
-		fmt.Printf("DownloadVideo - CreateDownloadRequest error: %v\n", err)
+		log.Printf("DownloadFullVideo - CreateDownloadRequest error: %v", err)
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}
 
 	// Start async download
 	go func() {
 		if err := downloader.FullVideoFHD(validatedURL); err != nil {
-			// Update status in repository
-			vs.VideoRepo.UpdateDownloadStatus(tempID, "failed", err.Error())
+			// Update status in repository with error logging
+			if updateErr := vs.VideoRepo.UpdateDownloadStatus(tempID, StatusFailed, err.Error()); updateErr != nil {
+				log.Printf("DownloadFullVideo - UpdateDownloadStatus error: %v", updateErr)
+			}
 			return
 		}
-		vs.VideoRepo.UpdateDownloadStatus(tempID, "completed", "")
+		if updateErr := vs.VideoRepo.UpdateDownloadStatus(tempID, StatusCompleted, ""); updateErr != nil {
+			log.Printf("DownloadFullVideo - UpdateDownloadStatus error: %v", updateErr)
+		}
 	}()
 
 	return tempID, nil
@@ -81,34 +125,44 @@ func (vs *VideoService) GetDownloadStatus(downloadID string) (string, error) {
 }
 
 // Time Range Download Methods
-func (vs *VideoService) DownloadVideoTimeRange(videoURL string, startTime, endTime int) (string, error) {
+func (vs *VideoService) DownloadVideoTimeRange(videoURL string, startSec, endSec int) (string, error) {
 	validatedURL, err := vs.validateURL(videoURL)
 	if err != nil {
 		return "", fmt.Errorf("invalid video URL: %w", err)
 	}
 
-	// Validate time range
-	if startTime < 0 || endTime <= startTime {
-		return "", fmt.Errorf("invalid time range: start_time must be >= 0 and end_time must be > start_time")
+	// Validate time range with reasonable bounds
+	if startSec < 0 {
+		return "", fmt.Errorf("invalid time range: startSec must be >= 0")
+	}
+	if endSec <= startSec {
+		return "", fmt.Errorf("invalid time range: endSec must be > startSec")
+	}
+	if endSec-startSec > MaxClipDurationSeconds {
+		return "", fmt.Errorf("invalid time range: clip duration cannot exceed %d seconds", MaxClipDurationSeconds)
 	}
 
 	// Generate a temporary ID for tracking
 	tempID := uuid.New().String()
 
 	// Store the download request in repository
-	if err := vs.VideoRepo.CreateTimeRangeDownloadRequest(tempID, validatedURL, startTime, endTime); err != nil {
-		fmt.Printf("DownloadVideoTimeRange - CreateTimeRangeDownloadRequest error: %v\n", err)
+	if err := vs.VideoRepo.CreateTimeRangeDownloadRequest(tempID, validatedURL, startSec, endSec); err != nil {
+		log.Printf("DownloadVideoTimeRange - CreateTimeRangeDownloadRequest error: %v", err)
 		return "", fmt.Errorf("failed to create time range download request: %w", err)
 	}
 
 	// Start async download and processing
 	go func() {
-		if err := downloader.TimeRangeFHD(validatedURL, startTime, endTime, tempID); err != nil {
-			// Update status in repository
-			vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, "failed", err.Error(), "")
+		if err := downloader.TimeRangeFHD(validatedURL, startSec, endSec, tempID); err != nil {
+			// Update status in repository with error logging
+			if updateErr := vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, StatusFailed, err.Error(), ""); updateErr != nil {
+				log.Printf("DownloadVideoTimeRange - UpdateTimeRangeDownloadStatus error: %v", updateErr)
+			}
 			return
 		}
-		vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, "completed", "", "")
+		if updateErr := vs.VideoRepo.UpdateTimeRangeDownloadStatus(tempID, StatusCompleted, "", ""); updateErr != nil {
+			log.Printf("DownloadVideoTimeRange - UpdateTimeRangeDownloadStatus error: %v", updateErr)
+		}
 	}()
 
 	return tempID, nil
