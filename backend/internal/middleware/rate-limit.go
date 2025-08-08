@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -50,6 +51,13 @@ func getEnvAsFloat(name string, defaultVal float64) float64 {
 }
 
 func getClientIP(c fiber.Ctx) string {
+	// Check Forwarded header first (RFC 7239)
+	if forwarded := c.Get("Forwarded"); forwarded != "" {
+		if clientIP := parseForwardedHeader(forwarded); clientIP != "" {
+			return clientIP
+		}
+	}
+
 	// Check various proxy headers in order of preference
 	headers := []string{
 		"X-Forwarded-For",
@@ -65,8 +73,8 @@ func getClientIP(c fiber.Ctx) string {
 			ips := strings.Split(ip, ",")
 			if len(ips) > 0 {
 				clientIP := strings.TrimSpace(ips[0])
-				// Basic validation for IP format
-				if isValidIP(clientIP) {
+				// Use net.ParseIP for robust IP validation
+				if net.ParseIP(clientIP) != nil {
 					return clientIP
 				}
 			}
@@ -75,40 +83,43 @@ func getClientIP(c fiber.Ctx) string {
 
 	// Fallback to direct IP
 	ip := c.IP()
-	if isValidIP(ip) {
+	if ip != "" && net.ParseIP(ip) != nil {
 		return ip
 	}
 
-	// Last resort - return the IP as is
-	return ip
+	// Last resort - return empty string if no valid IP found
+	return ""
 }
 
-func isValidIP(ip string) bool {
-	// Basic validation for IPv4 and IPv6
-	if ip == "" {
-		return false
-	}
+// parseForwardedHeader parses the Forwarded header according to RFC 7239
+// and extracts the client IP address
+func parseForwardedHeader(forwarded string) string {
+	// Forwarded header format: "for=<client-ip>;by=<server-ip>;host=<host>;proto=<protocol>"
+	// Multiple entries can be separated by commas
+	entries := strings.Split(forwarded, ",")
 
-	// Check for IPv4 format
-	if strings.Contains(ip, ".") {
-		parts := strings.Split(ip, ".")
-		if len(parts) != 4 {
-			return false
-		}
-		for _, part := range parts {
-			if part == "" {
-				return false
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		// Look for the "for=" parameter
+		if strings.HasPrefix(entry, "for=") {
+			// Extract the IP address after "for="
+			forPart := strings.TrimPrefix(entry, "for=")
+			// Remove quotes if present
+			forPart = strings.Trim(forPart, `"`)
+			// Remove any additional parameters (semicolon-separated)
+			if semicolonIndex := strings.Index(forPart, ";"); semicolonIndex != -1 {
+				forPart = forPart[:semicolonIndex]
+			}
+
+			clientIP := strings.TrimSpace(forPart)
+			// Validate the IP using net.ParseIP
+			if net.ParseIP(clientIP) != nil {
+				return clientIP
 			}
 		}
-		return true
 	}
 
-	// Check for IPv6 format (basic check)
-	if strings.Contains(ip, ":") {
-		return len(ip) > 0
-	}
-
-	return false
+	return ""
 }
 
 func getLimiter(ip string) *rate.Limiter {
