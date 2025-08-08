@@ -37,7 +37,7 @@ create table if not exists public.downloads (
 -- Create trigger to automatically update updated_at on row updates
 create trigger set_updated_at_downloads
   before update on public.downloads
-  for each row execute procedure public.set_updated_at();
+  for each row execute function public.set_updated_at();
 
 -- Drop any existing trigger on time_range_downloads table
 drop trigger if exists set_updated_at_time_range_downloads on public.time_range_downloads;
@@ -57,7 +57,7 @@ create table if not exists public.time_range_downloads (
 -- Create trigger to automatically update updated_at on row updates
 create trigger set_updated_at_time_range_downloads
   before update on public.time_range_downloads
-  for each row execute procedure public.set_updated_at();
+  for each row execute function public.set_updated_at();
 
 -- Create profiles table to store user credits and email from auth.users
 create table if not exists profiles (
@@ -105,6 +105,7 @@ end;
 $$ language plpgsql security definer set search_path = public, auth;
 
 -- Create trigger for new user signup
-create or replace trigger on_auth_user_created
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
   after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+  for each row execute function public.handle_new_user();
