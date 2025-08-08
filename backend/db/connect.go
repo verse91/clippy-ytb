@@ -24,6 +24,7 @@ func InitDB() error {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	// Assign to global DB variable
 	DB = db
 
 	// https://gorm.io/docs/generic_interface.html#Connection-Pool
