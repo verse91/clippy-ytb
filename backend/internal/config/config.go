@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	DBUrl string
+	DBUrl    string
+	AdminKey string
 }
 
 func LoadConfig() *Config {
@@ -15,7 +16,15 @@ func LoadConfig() *Config {
 		logger.Log.Error("SUPABASE_DB_URL is not set")
 		return nil
 	}
+
+	admin_key := utils.GetEnv("ADMIN_KEY", "")
+	if admin_key == "" {
+		logger.Log.Error("ADMIN_KEY is not set")
+		return nil
+	}
+
 	return &Config{
-		DBUrl: db_url,
+		DBUrl:    db_url,
+		AdminKey: admin_key,
 	}
 }

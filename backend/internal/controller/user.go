@@ -4,7 +4,8 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/supabase-community/supabase-go"
+	supabase "github.com/supabase-community/supabase-go"
+	"github.com/verse91/ytb-clipy/backend/internal/config"
 	"github.com/verse91/ytb-clipy/backend/internal/service"
 	"github.com/verse91/ytb-clipy/backend/pkg/response"
 )
@@ -17,11 +18,13 @@ type Person struct {
 
 type UserController struct {
 	UserService *service.UserService
+	Config      *config.Config
 }
 
-func NewUserController(supabaseClient *supabase.Client) *UserController {
+func NewUserController(supabaseClient *supabase.Client, config *config.Config) *UserController {
 	return &UserController{
 		UserService: service.NewUserService(supabaseClient),
+		Config:      config,
 	}
 }
 
@@ -61,10 +64,15 @@ func (uc *UserController) GetUserCredits(c *fiber.Ctx) error {
 
 // UpdateUserCredits sets the credit balance for a user (admin only)
 func (uc *UserController) UpdateUserCredits(c *fiber.Ctx) error {
-	// Additional authorization check - verify admin key is present
+	// Admin authorization check - verify admin key is present and valid
 	adminKey := (*c).Get("X-Admin-Key")
 	if adminKey == "" {
 		return response.ErrorResponse(*c, 401, "Admin authentication required")
+	}
+
+	// Validate admin key against configured value
+	if adminKey != uc.Config.AdminKey {
+		return response.ErrorResponse(*c, 401, "Invalid admin key")
 	}
 
 	userID := (*c).Params("userID")

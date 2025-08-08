@@ -16,6 +16,7 @@ import (
 	// "github.com/goccy/go-json"
 	"github.com/verse91/ytb-clipy/backend/db"
 	"github.com/verse91/ytb-clipy/backend/db/migrations"
+	"github.com/verse91/ytb-clipy/backend/internal/config"
 	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 	router "github.com/verse91/ytb-clipy/backend/internal/routes"
 	"github.com/verse91/ytb-clipy/backend/pkg/logger"
@@ -51,6 +52,12 @@ func main() {
 	}
 	logger.InitLogger()
 
+	// Load configuration
+	cfg := config.LoadConfig()
+	if cfg == nil {
+		log.Fatal("Failed to load configuration")
+	}
+
 	// Initialize database and run migrations
 	if err := db.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -76,7 +83,7 @@ func main() {
 	v1 := app.Group("/api/v1")
 
 	// Setup all routes
-	router.SetupRoutes(v1, supaClient)
+	router.SetupRoutes(v1, supaClient, cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
