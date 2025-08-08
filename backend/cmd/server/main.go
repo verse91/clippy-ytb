@@ -37,9 +37,9 @@ func main() {
 	supabaseURL := os.Getenv("SUPABASE_DB_ENDPOINT")
 	supabaseKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-	// Debug logging
-	log.Printf("Supabase URL: %s", supabaseURL)
-	log.Printf("Supabase Key length: %d", len(supabaseKey))
+	// // Debug logging
+	// log.Printf("Supabase URL: %s", supabaseURL)
+	// log.Printf("Supabase Key length: %d", len(supabaseKey))
 
 	if supabaseURL == "" || supabaseKey == "" {
 		log.Fatal("SUPABASE_DB_ENDPOINT and SUPABASE_SERVICE_ROLE_KEY environment variables are required")
