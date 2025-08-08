@@ -17,9 +17,9 @@ func LoadConfig() *Config {
 		return nil
 	}
 
-	admin_key := utils.GetEnv("ADMIN_KEY", "")
+	admin_key := utils.GetEnv("ADMIN_SECRET_KEY", "")
 	if admin_key == "" {
-		logger.Log.Error("ADMIN_KEY is not set")
+		logger.Log.Error("ADMIN_SECRET_KEY is not set")
 		return nil
 	}
 

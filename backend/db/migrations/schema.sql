@@ -22,9 +22,7 @@ begin
 end;
 $$ language plpgsql;
 
--- Drop any existing trigger on downloads table
-drop trigger if exists set_updated_at_downloads on public.downloads;
-
+-- Create downloads table first
 create table if not exists public.downloads (
   id uuid primary key default gen_random_uuid(),
   url text not null,
@@ -34,14 +32,15 @@ create table if not exists public.downloads (
   updated_at timestamptz default now()
 );
 
+-- Drop any existing trigger on downloads table (after table is created)
+drop trigger if exists set_updated_at_downloads on public.downloads;
+
 -- Create trigger to automatically update updated_at on row updates
 create trigger set_updated_at_downloads
   before update on public.downloads
   for each row execute function public.set_updated_at();
 
--- Drop any existing trigger on time_range_downloads table
-drop trigger if exists set_updated_at_time_range_downloads on public.time_range_downloads;
-
+-- Create time_range_downloads table first
 create table if not exists public.time_range_downloads (
   id uuid primary key default gen_random_uuid(),
   url text not null,
@@ -53,6 +52,9 @@ create table if not exists public.time_range_downloads (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Drop any existing trigger on time_range_downloads table (after table is created)
+drop trigger if exists set_updated_at_time_range_downloads on public.time_range_downloads;
 
 -- Create trigger to automatically update updated_at on row updates
 create trigger set_updated_at_time_range_downloads
