@@ -143,16 +143,6 @@ func isDatabaseUpToDate() bool {
 	return true
 }
 
-// updateSchemaVersion updates the schema version in the database
-func updateSchemaVersion(version int) error {
-	// Insert new schema version record
-	err := db.DB.Exec("INSERT INTO schema_version (version, applied_at) VALUES (?, NOW())", version).Error
-	if err != nil {
-		return fmt.Errorf("failed to insert schema version: %w", err)
-	}
-	return nil
-}
-
 // updateSchemaVersionInTx updates the schema version within a transaction
 func updateSchemaVersionInTx(tx *gorm.DB, version int) error {
 	// Insert new schema version record
