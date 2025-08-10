@@ -22,7 +22,7 @@ drf:
 
 
 b: #backend
-	@go run -C backend ./cmd/server
+	@cd backend && air
 
 f: #frontend
 	@cd frontend && bun run net
