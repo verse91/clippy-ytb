@@ -1,5 +1,5 @@
 root = "."
-tmp_dir = "./pkg/logger/log/"
+tmp_dir = "./log/tmp"
 
 [build]
     cmd = "go build -o ./cmd/server/tmp/main ./cmd/server/main.go"
