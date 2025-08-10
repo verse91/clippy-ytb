@@ -3,12 +3,13 @@ tmp_dir = "tmp"
 
 [build]
     cmd = "go run ./cmd/server/main.go"
-    bin = "tmp/main.exe"
+    bin = "" 
     include_ext = ["go", "yaml", "yml", "env"]
     exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
     exclude_file = []
-    delay = 1000
+    delay = 200
     send_interrupt = true
+    stop_on_error = true
     log = "build.log"
 
 [log]
