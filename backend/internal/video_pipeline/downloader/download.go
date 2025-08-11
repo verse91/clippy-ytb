@@ -20,7 +20,7 @@ func getExecutablePath(name string) string {
 }
 
 func getConfigValue(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
+	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}
 	return defaultValue

@@ -3,12 +3,13 @@ package router
 import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/supabase-community/supabase-go"
+	"github.com/verse91/ytb-clipy/backend/internal/config"
 	"github.com/verse91/ytb-clipy/backend/internal/controller"
 	"github.com/verse91/ytb-clipy/backend/internal/middleware"
 )
 
-func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client) {
-	userController := controller.NewUserController(supabaseClient)
+func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client, config *config.Config) {
+	userController := controller.NewUserController(supabaseClient, config)
 	videoController := controller.NewVideoController(supabaseClient)
 
 	router.Get("/", homepageHandler)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/verse91/ytb-clipy/backend/internal/repo"
 	"github.com/verse91/ytb-clipy/backend/internal/service"
@@ -62,6 +63,26 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 			zap.String("handler", "DownloadHandler"),
 		)
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
+	}
+
+	// Validate URL format and scheme
+	parsedURL, err := url.ParseRequestURI(req.URL)
+	if err != nil {
+		logger.Log.Warn("Invalid URL format",
+			zap.String("url", req.URL),
+			zap.Error(err),
+			zap.String("handler", "DownloadHandler"),
+		)
+		return response.ErrorResponse(c, response.ErrInvalidRequestBody, "Invalid URL format")
+	}
+
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		logger.Log.Warn("Unsupported URL scheme",
+			zap.String("url", req.URL),
+			zap.String("scheme", parsedURL.Scheme),
+			zap.String("handler", "DownloadHandler"),
+		)
+		return response.ErrorResponse(c, response.ErrInvalidRequestBody, "URL must use HTTP or HTTPS scheme")
 	}
 
 	downloadID, err := vc.VideoService.DownloadFullVideo(req.URL)
@@ -133,6 +154,26 @@ func (vc *VideoController) DownloadTimeRangeHandler(c fiber.Ctx) error {
 
 	if req.URL == "" {
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
+	}
+
+	// Validate URL format and scheme
+	parsedURL, err := url.ParseRequestURI(req.URL)
+	if err != nil {
+		logger.Log.Warn("Invalid URL format",
+			zap.String("url", req.URL),
+			zap.Error(err),
+			zap.String("handler", "DownloadTimeRangeHandler"),
+		)
+		return response.ErrorResponse(c, response.ErrInvalidRequestBody, "Invalid URL format")
+	}
+
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		logger.Log.Warn("Unsupported URL scheme",
+			zap.String("url", req.URL),
+			zap.String("scheme", parsedURL.Scheme),
+			zap.String("handler", "DownloadTimeRangeHandler"),
+		)
+		return response.ErrorResponse(c, response.ErrInvalidRequestBody, "URL must use HTTP or HTTPS scheme")
 	}
 
 	if req.StartTime < 0 || req.EndTime <= req.StartTime {

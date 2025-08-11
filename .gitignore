@@ -40,6 +40,8 @@ yarn-error.log*
 .eslintcache
 .cache/
 *.tsbuildinfo
+log/
+**/*.log
 
 # ================== Editor / IDE ==================
 .vscode/
@@ -72,7 +74,7 @@ frontend/yarn-*.log
 
 # ================== Backend (Go) ==================
 backend/bin/
-backend/pkg/logger/log
+backend/cmd/server/tmp/
 backend/tmp/
 backend/.env*
 backend/coverage/

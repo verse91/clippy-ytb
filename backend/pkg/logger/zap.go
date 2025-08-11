@@ -1,8 +1,9 @@
 package logger
 
 import (
+	"fmt"
 	"os"
-
+    "time"
 	// z "go.uber.org/zap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -31,18 +32,26 @@ func InitLogger() {
 	// logger, _ = z.NewProduction()
 	// logger.Info("This is Production")
 
-	encoder := getEncoderLog()
-	writerSync := getWriterSync()
-	core := zapcore.NewCore(encoder, writerSync, zapcore.InfoLevel)
+	consoleEncoder := getConsoleEncoder()
+	fileEncoder := getFileLog()
+
+	writerFile := zapcore.AddSync(getWriterSync())
+	writerConsole := zapcore.AddSync(os.Stderr)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(fileEncoder, writerFile, zapcore.DebugLevel),
+		zapcore.NewCore(consoleEncoder, writerConsole, zapcore.DebugLevel),
+	)
+
 	Log = zap.New(core, zap.AddCaller())
 
-	Log.Info("Info log", zap.Int("line", 1))
-	Log.Error("Error log", zap.Int("line", 2))
+	// Log.Info("Info log", zap.Int("line", 1))
+	// Log.Error("Error log", zap.Int("line", 2))
 
 }
 
 // format logs a msg
-func getEncoderLog() zapcore.Encoder {
+func getFileLog() zapcore.Encoder {
 	encodeConfig := zap.NewProductionEncoderConfig()
 	encodeConfig.TimeKey = "time"
 	encodeConfig.EncodeLevel = zapcore.CapitalLevelEncoder
@@ -51,14 +60,31 @@ func getEncoderLog() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encodeConfig)
 }
 
+func getConsoleEncoder() zapcore.Encoder {
+	encodeConfig := zapcore.EncoderConfig{
+		TimeKey:        "TIME",
+		LevelKey:       "LEVEL",
+		NameKey:        "LOGGER",
+		CallerKey:      "",
+		MessageKey:     "MSG",
+		StacktraceKey:  "STACKTRACE",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder,
+		EncodeTime:     customTimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   nil,
+	}
+	return zapcore.NewConsoleEncoder(encodeConfig)
+}
+
 func getWriterSync() zapcore.WriteSyncer {
 	// Create log directory if it doesn't exist
-	if err := os.MkdirAll("./pkg/logger/log", 0755); err != nil {
+	if err := os.MkdirAll("../log", 0755); err != nil {
 		panic(err)
 	}
 
 	lumberjackLogger := &lumberjack.Logger{
-		Filename:   "./pkg/logger/log/info.log",
+		Filename:   "../log/info.log",
 		MaxSize:    1, // megabytes
 		MaxBackups: 5,
 		MaxAge:     5,   //days
@@ -66,7 +92,10 @@ func getWriterSync() zapcore.WriteSyncer {
         LocalTime: true,
 	}
 	syncfile := zapcore.AddSync(lumberjackLogger)
-	syncConsole := zapcore.AddSync(os.Stderr)
-	return zapcore.NewMultiWriteSyncer(syncConsole, syncfile)
+	return zapcore.NewMultiWriteSyncer(syncfile)
 
+}
+
+func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(fmt.Sprintf("[%s]", t.Format("15:04:05-02/01/2006")))
 }
