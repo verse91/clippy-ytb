@@ -31,7 +31,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("Warning: Could not load .env file (this is OK if env vars are set via system): %v", err)
+		log.Fatal("Error loading .env file")
 	}
 
 	supabaseURL := os.Getenv("SUPABASE_DB_ENDPOINT")
