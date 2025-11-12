@@ -22,33 +22,32 @@ func NewVideoRepo(supaClient *supabase.Client) *VideoRepo {
 	}
 }
 
-func (vr *VideoRepo) CreateDownloadRequest(id, videoURL string) error {
+func (r *VideoRepo) CreateDownloadRequest(_ string, url string) (string, error) {
 	data := map[string]interface{}{
-		"url":    videoURL,
-		"status": "processing",
+		"url":     url,
+		"status":  "processing",
+		"message": nil,
 	}
 
-	// Debug logging
-	fmt.Printf("Inserting data: %+v\n", data)
-
-	result, count, err := vr.client.From("downloads").Insert(data, false, "", "", "").Execute()
+	var inserted []map[string]interface{}
+	_, err := r.client.From("downloads").
+		Insert(data, true, "", "", "").ExecuteTo(&inserted)
 	if err != nil {
-		// Detailed error logging
-		// fmt.Printf("CreateDownloadRequest detailed error: %+v\n", err)
-		// fmt.Printf("Error type: %T\n", err)
-		// fmt.Printf("Error string: %s\n", err.Error())
-
-		if strings.Contains(err.Error(), "duplicate key") {
-			return fmt.Errorf("download already exists")
-		}
-		return fmt.Errorf("insert error: %s", err.Error())
+		return "", err
 	}
 
-	fmt.Printf("Insert successful - Result: %s, Count: %d\n", string(result), count)
-	return nil
+	if len(inserted) == 0 {
+		return "", fmt.Errorf("insert succeeded but returned no ID")
+	}
+
+	id, ok := inserted[0]["id"].(string)
+	if !ok || id == "" {
+		return "", fmt.Errorf("failed to parse returned ID")
+	}
+
+	return id, nil
 }
 
-// Cập nhật trạng thái (thành công / thất bại)
 func (vr *VideoRepo) UpdateDownloadStatus(id, status, message string) error {
 	data := map[string]interface{}{
 		"status":  status,

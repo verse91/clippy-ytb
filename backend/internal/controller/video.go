@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"bufio"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/verse91/ytb-clipy/backend/internal/repo"
 	"github.com/verse91/ytb-clipy/backend/internal/service"
@@ -12,6 +14,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v3"
 	"github.com/supabase-community/supabase-go"
+	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 )
 
@@ -132,6 +135,61 @@ func (vc *VideoController) GetDownloadStatus(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).Send(prettyJSON)
+}
+
+func (vc *VideoController) StreamDownloadStatus(c fiber.Ctx) error {
+	downloadID := c.Params("id")
+	if downloadID == "" {
+		return response.ErrorResponse(c, response.ErrDownloadIDRequired, "Download ID is required")
+	}
+
+	// Lưu fasthttp context ngay lập tức
+	fasthttpCtx := c.Context()
+
+	// Setup SSE headers
+	c.Set("Content-Type", "text/event-stream")
+	c.Set("Cache-Control", "no-cache")
+	c.Set("Connection", "keep-alive")
+	c.Set("Transfer-Encoding", "chunked")
+	c.Set("X-Accel-Buffering", "no")
+
+	// Không dùng c.Context() bên trong goroutine
+	return c.SendStream(fasthttp.NewStreamReader(func(w *bufio.Writer) {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			// ✅ Dừng khi client ngắt kết nối
+			case <-fasthttpCtx.Done():
+				logger.Log.Info("Client disconnected from SSE",
+					zap.String("download_id", downloadID))
+				return
+
+			// ✅ Poll mỗi giây
+			case <-ticker.C:
+				status, err := vc.VideoService.GetDownloadStatus(downloadID)
+				if err != nil {
+					fmt.Fprintf(w, "data: {\"error\": \"failed to get status\"}\n\n")
+					_ = w.Flush()
+					continue
+				}
+
+				fmt.Fprintf(w, "data: %s\n\n", status)
+				if err := w.Flush(); err != nil {
+					logger.Log.Warn("Failed to flush SSE data", zap.Error(err))
+					return
+				}
+
+				if status == "completed" || status == "failed" {
+					logger.Log.Info("SSE stream ended",
+						zap.String("download_id", downloadID),
+						zap.String("status", status))
+					return
+				}
+			}
+		}
+	}))
 }
 
 func (vc *VideoController) DownloadTimeRangeHandler(c fiber.Ctx) error {

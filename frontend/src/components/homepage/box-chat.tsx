@@ -155,15 +155,12 @@ export function BoxChat() {
             minHeight: 60,
             maxHeight: 200,
         });
-
-    // Use the auto-resize textarea ref
+    const [statusText, setStatusText] = useState<string | null>(null);
     const textareaRefToUse = autoResizeTextareaRef;
     const [isChecked, setIsChecked] = useState(true);
 
-    // Inject ripple styles on client side only
     useEffect(() => {
         if (typeof document !== "undefined") {
-            // Check if the style already exists to prevent duplicates
             const existingStyle = document.querySelector(
                 "style[data-ripple-keyframes]"
             );
@@ -175,7 +172,6 @@ export function BoxChat() {
             }
         }
 
-        // Cleanup function to remove the style when component unmounts
         return () => {
             if (typeof document !== "undefined") {
                 const style = document.querySelector("style[data-ripple-keyframes]");
@@ -197,18 +193,67 @@ export function BoxChat() {
         };
     }, []);
 
-    const handleSendMessage = () => {
-        if (value.trim()) {
-            startTransition(() => {
-                setIsTyping(true);
-                setTimeout(() => {
-                    setIsTyping(false);
-                    setValue("");
-                    adjustHeight(true);
-                }, 2000);
+    const localHost = "http://localhost:" + process.env.NEXT_PUBLIC_BACKEND_PORT;
+    const handleSendMessage = async () => {
+        const trimmed = value.trim();
+        if (!trimmed || isTyping) return;
+
+        if (!isYouTubeUrl(trimmed) || hasPlaylist(trimmed)) {
+            setStatusText("Invalid link or playlist");
+            setIsTyping(true);
+            setTimeout(() => {
+                setIsTyping(false);
+                setStatusText(null);
+                setValue("");
+                adjustHeight(true);
+            }, 1000);
+            return;
+        }
+
+        setIsTyping(true);
+
+        try {
+            const res = await fetch(`${localHost}/api/v1/video/download`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: trimmed }),
             });
+
+            if (!res.ok) throw new Error(`Server error: ${res.status}`);
+            const data = await res.json();
+            const downloadId = data.download_id;
+
+            const eventSource = new EventSource(`${localHost}/api/v1/video/download/${downloadId}/stream`);
+
+            eventSource.onmessage = (event) => {
+                console.log("📡 SSE:", event.data);
+                if (event.data === "completed") {
+                    setStatusText("Done");
+                    eventSource.close();
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        setStatusText(null);
+                        setValue("");
+                        adjustHeight(true);
+                    }, 1000);
+                } else if (event.data === "failed") {
+                    setStatusText("❌ Failed");
+                    eventSource.close();
+                    setIsTyping(false);
+                }
+            };
+
+            eventSource.onerror = (err) => {
+                console.error("SSE error:", err);
+                eventSource.close();
+                setIsTyping(false);
+            };
+        } catch (err) {
+            console.error("❌ Error:", err);
+            setIsTyping(false);
         }
     };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -446,7 +491,7 @@ export function BoxChat() {
                 </motion.div>
             </div>
 
-            {isTyping ? (
+            {isTyping && (
                 <NotiPopup
                     isVisible={isTyping}
                     icon={<i className="bxl bx-youtube" style={{ color: "#ff0000" }}></i>}
@@ -454,10 +499,14 @@ export function BoxChat() {
                         hasPlaylist(value) && isYouTubeUrl(value)
                             ? "Playlist is not supported"
                             : isYouTubeUrl(value)
-                                ? "Processing"
+                                ? statusText || "Processing..."
                                 : "This is not a Youtube video link"
                     }
-                    showTypingDots={!hasPlaylist(value) && isYouTubeUrl(value)}
+                    showTypingDots={
+                        statusText?.startsWith("Processing") &&
+                        !hasPlaylist(value) &&
+                        isYouTubeUrl(value)
+                    }
                     widthClassName={
                         hasPlaylist(value) && isYouTubeUrl(value)
                             ? "w-[44vw] max-w-md sm:w-auto sm:max-w-none"
@@ -466,7 +515,7 @@ export function BoxChat() {
                                 : "w-[53vw] max-w-md sm:w-auto sm:max-w-none"
                     }
                 />
-            ) : null}
+            )}
 
             {inputFocused && (
                 <motion.div
@@ -487,46 +536,3 @@ export function BoxChat() {
     );
 }
 
-interface ActionButtonProps {
-    icon: React.ReactNode;
-    label: string;
-}
-
-function ActionButton({ icon, label }: ActionButtonProps) {
-    const [isHovered, setIsHovered] = useState(false);
-
-    return (
-        <motion.button
-            type="button"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
-            className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 rounded-full border border-neutral-800 text-neutral-400 hover:text-white transition-all relative overflow-hidden group"
-        >
-            <div className="relative z-10 flex items-center gap-2">
-                {icon}
-                <span className="text-xs relative z-10">{label}</span>
-            </div>
-
-            <AnimatePresence>
-                {isHovered && (
-                    <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-violet-500/10 to-indigo-500/10"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                    />
-                )}
-            </AnimatePresence>
-
-            <motion.span
-                className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500"
-                initial={{ width: 0 }}
-                whileHover={{ width: "100%" }}
-                transition={{ duration: 0.3 }}
-            />
-        </motion.button>
-    );
-}

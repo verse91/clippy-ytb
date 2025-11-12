@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/supabase-community/supabase-go v0.0.4
+	github.com/valyala/fasthttp v1.58.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/time v0.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -38,7 +39,6 @@ require (
 	github.com/tinylib/msgp v1.2.5 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.58.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

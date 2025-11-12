@@ -24,7 +24,7 @@ const (
 
 // VideoRepository interface defines the contract for video repository operations
 type VideoRepository interface {
-	CreateDownloadRequest(id, url string) error
+	CreateDownloadRequest(id, url string) (string, error)
 	UpdateDownloadStatus(id, status, errorMsg string) error
 	GetStatus(id string) (string, error)
 	CreateTimeRangeDownloadRequest(id, url string, startSec, endSec int) error
@@ -85,30 +85,21 @@ func (vs *VideoService) DownloadFullVideo(videoURL string) (string, error) {
 		return "", fmt.Errorf("invalid video URL: %w", err)
 	}
 
-	// Generate a temporary ID for tracking - the database will generate the real UUID
-	tempID := uuid.New().String()
-
-	// Store the download request in repository
-	if err := vs.VideoRepo.CreateDownloadRequest(tempID, validatedURL); err != nil {
-		log.Printf("DownloadFullVideo - CreateDownloadRequest error: %v", err)
+	// 🧩 Supabase tự sinh ID, ta nhận lại
+	downloadID, err := vs.VideoRepo.CreateDownloadRequest("", validatedURL)
+	if err != nil {
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}
 
-	// Start async download
 	go func() {
 		if err := downloader.FullVideoFHD(validatedURL); err != nil {
-			// Update status in repository with error logging
-			if updateErr := vs.VideoRepo.UpdateDownloadStatus(tempID, StatusFailed, err.Error()); updateErr != nil {
-				log.Printf("DownloadFullVideo - UpdateDownloadStatus error: %v", updateErr)
-			}
+			vs.VideoRepo.UpdateDownloadStatus(downloadID, StatusFailed, err.Error())
 			return
 		}
-		if updateErr := vs.VideoRepo.UpdateDownloadStatus(tempID, StatusCompleted, ""); updateErr != nil {
-			log.Printf("DownloadFullVideo - UpdateDownloadStatus error: %v", updateErr)
-		}
+		vs.VideoRepo.UpdateDownloadStatus(downloadID, StatusCompleted, "")
 	}()
 
-	return tempID, nil
+	return downloadID, nil
 }
 
 func (vs *VideoService) GetDownloadStatus(downloadID string) (string, error) {

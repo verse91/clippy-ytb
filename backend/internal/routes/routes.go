@@ -34,6 +34,10 @@ func SetupRoutes(router fiber.Router, supabaseClient *supabase.Client, config *c
 		return videoController.GetDownloadStatus(c)
 	})
 
+	router.Get("/video/download/:id/stream", func(c fiber.Ctx) error {
+		return videoController.StreamDownloadStatus(c)
+	})
+
 	router.Post("/video/download/time-range", func(c fiber.Ctx) error {
 		return videoController.DownloadTimeRangeHandler(c)
 	})

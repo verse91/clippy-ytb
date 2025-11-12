@@ -21,6 +21,6 @@ services:
         - ytb-clipy-frontend
     image: ytb-clipy-frontend
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "${NEXT_PUBLIC_FRONTEND_PORT}:3000"
     env_file:
       - ./.env
