@@ -31,10 +31,9 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Printf("Warning: Could not load .env file (this is OK if env vars are set via system): %v", err)
 	}
 
-	// Initialize Supabase client
 	supabaseURL := os.Getenv("SUPABASE_DB_ENDPOINT")
 	supabaseKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 
@@ -52,25 +51,21 @@ func main() {
 	}
 	logger.InitLogger()
 
-	// Load configuration
 	cfg := config.LoadConfig()
 	if cfg == nil {
 		log.Fatal("Failed to load configuration")
 	}
 
-	// Initialize database and run migrations
 	if err := db.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Run database migrations
 	if err := migrations.RunDatabaseMigrations(); err != nil {
 		log.Printf("Warning: Database migrations failed: %v", err)
 	}
 
 	app := fiber.New()
 
-	// Add CORS middleware
 	allowedOrigins := utils.GetEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 
 	app.Use(cors.New(cors.Config{
@@ -82,7 +77,6 @@ func main() {
 	app.Use(middleware.RateLimitMiddleware)
 	v1 := app.Group("/api/v1")
 
-	// Setup all routes
 	router.SetupRoutes(v1, supaClient, cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -94,5 +88,4 @@ func main() {
 		cancel()
 		panic(err)
 	}
-	// Optionally wait for cleanup goroutine to finish if needed
 }
