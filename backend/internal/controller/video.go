@@ -60,7 +60,8 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 
 	logger.Log.Info("Parsed download request",
 		zap.String("url", req.URL),
-		zap.String("handler", "DownloadHandler"),
+		zap.Bool("auto_block_sponsor", req.AutoBlockSponsor),
+		zap.Bool("import_thumbnail", req.ImportThumbnail),
 	)
 
 	if req.URL == "" {
