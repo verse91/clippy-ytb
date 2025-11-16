@@ -23,7 +23,9 @@ type VideoController struct {
 }
 
 type VideoRequest struct {
-	URL string `json:"url" binding:"required"`
+	URL              string `json:"url" binding:"required"`
+	AutoBlockSponsor bool   `json:"autoBlockSponsor"`
+	ImportThumbnail  bool   `json:"importThumbnail"`
 }
 
 type TimeRangeVideoRequest struct {
@@ -87,7 +89,7 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 		return response.ErrorResponse(c, response.ErrInvalidRequestBody, "URL must use HTTP or HTTPS scheme")
 	}
 
-	downloadID, err := vc.VideoService.DownloadFullVideo(req.URL)
+	downloadID, err := vc.VideoService.DownloadFullVideo(req.URL, req.AutoBlockSponsor, req.ImportThumbnail)
 	if err != nil {
 		logger.Log.Error("Failed to start download",
 			zap.Error(err),

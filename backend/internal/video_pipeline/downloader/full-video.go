@@ -10,18 +10,29 @@ import (
 	"time"
 )
 
-func FullVideoFHD(videoURL string) error {
+func FullVideoFHD(videoURL string, autoBlockSponsor, importThumbnail bool) error {
 	start := time.Now()
 
 	// make sure to check no playlist from user's input, video will download for the res <=1080p
-	cmd_1080p := exec.Command(
-		ytDlpPath,
+	cmd := []string{
 		"--no-playlist",
 		"-f", `bv*[height<=1080][vcodec~=avc1]+ba*[ext=m4a]/bv*[height<=1080]+ba*[ext=m4a]/bv*+ba*/best[height<=1080]/best`,
 		"-S", "res:1080,+codec:avc1,+br",
-		"-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"),
-		videoURL,
-	)
+	}
+	if autoBlockSponsor {
+		cmd = append(cmd, "--sponsorblock-remove", "all")
+	}
+
+	if importThumbnail {
+		cmd = append(cmd,
+			"--embed-thumbnail",
+		)
+	}
+
+	cmd = append(cmd, "-o", filepath.Join(outputDir, "%(title)s (%(height)sp, h264).%(ext)s"))
+	cmd = append(cmd, videoURL)
+
+	cmd_1080p := exec.Command(ytDlpPath, cmd...)
 	var stdoutBuf bytes.Buffer
 	var stderrBuf bytes.Buffer
 	cmd_1080p.Stdout = &stdoutBuf

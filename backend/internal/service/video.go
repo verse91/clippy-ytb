@@ -79,20 +79,19 @@ func (vs *VideoService) validateURL(videoURL string) (string, error) {
 	return parsedURL.String(), nil
 }
 
-func (vs *VideoService) DownloadFullVideo(videoURL string) (string, error) {
+func (vs *VideoService) DownloadFullVideo(videoURL string, autoBlockSponsor, importThumbnail bool) (string, error) {
 	validatedURL, err := vs.validateURL(videoURL)
 	if err != nil {
 		return "", fmt.Errorf("invalid video URL: %w", err)
 	}
 
-	// 🧩 Supabase tự sinh ID, ta nhận lại
 	downloadID, err := vs.VideoRepo.CreateDownloadRequest("", validatedURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to create download request: %w", err)
 	}
 
 	go func() {
-		if err := downloader.FullVideoFHD(validatedURL); err != nil {
+		if err := downloader.FullVideoFHD(validatedURL, autoBlockSponsor, importThumbnail); err != nil {
 			vs.VideoRepo.UpdateDownloadStatus(downloadID, StatusFailed, err.Error())
 			return
 		}

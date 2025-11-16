@@ -149,7 +149,6 @@ export function BoxChat() {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [selectedOption, setSelectedOption] = useState("auto");
     const [thumbnailEnabled, setThumbnailEnabled] = useState(false);
-    const [isPending, startTransition] = useTransition();
     const { textareaRef: autoResizeTextareaRef, adjustHeight } =
         useAutoResizeTextarea({
             minHeight: 60,
@@ -157,7 +156,7 @@ export function BoxChat() {
         });
     const [statusText, setStatusText] = useState<string | null>(null);
     const textareaRefToUse = autoResizeTextareaRef;
-    const [isChecked, setIsChecked] = useState(true);
+    const [sponsorblockEnable, setSponsorblockEnable] = useState(true);
 
     useEffect(() => {
         if (typeof document !== "undefined") {
@@ -192,7 +191,7 @@ export function BoxChat() {
             if (now - lastUpdateTime < throttleMs) {
                 return;
             }
-            
+
             if (rafId === null) {
                 rafId = requestAnimationFrame(() => {
                     setMousePosition({ x: e.clientX, y: e.clientY });
@@ -234,7 +233,11 @@ export function BoxChat() {
             const res = await fetch(`${localHost}/api/v1/video/download`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: trimmed }),
+                body: JSON.stringify({
+                    url: trimmed,
+                    autoBlockSponsor: sponsorblockEnable,
+                    importThumbnail: thumbnailEnabled
+                }),
             });
 
             if (!res.ok) throw new Error(`Server error: ${res.status}`);
@@ -420,22 +423,21 @@ export function BoxChat() {
                                     </div>
                                 </div>
 
-                                {/* Audio and Subtitles Switches */}
+                                {/* Sponsor Switches */}
                                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-between">
-                                    {/* Audio Switch */}
                                     <div className="flex flex-col gap-1 items-start min-w-[120px]">
                                         <label
                                             className="text-xs text-white/60 mb-1"
-                                            htmlFor="audio-switch"
+                                            htmlFor="sponsor-switch"
                                         >
                                             SponsorBlock:
                                         </label>
                                         <div className="flex items-center gap-2">
                                             <Switch
-                                                id="audio-switch"
+                                                id="sponsor-switch"
                                                 className="cursor-pointer"
-                                                checked={isChecked}
-                                                onCheckedChange={setIsChecked}
+                                                checked={sponsorblockEnable}
+                                                onCheckedChange={setSponsorblockEnable}
                                                 aria-label="Auto block sponsor segments"
                                                 aria-describedby="sponsor-description"
                                             />
