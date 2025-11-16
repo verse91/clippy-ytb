@@ -183,13 +183,31 @@ export function BoxChat() {
     }, []);
 
     useEffect(() => {
+        let rafId: number | null = null;
+        let lastUpdateTime = 0;
+        const throttleMs = 16; // ~60fps max
+
         const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
+            const now = performance.now();
+            if (now - lastUpdateTime < throttleMs) {
+                return;
+            }
+            
+            if (rafId === null) {
+                rafId = requestAnimationFrame(() => {
+                    setMousePosition({ x: e.clientX, y: e.clientY });
+                    rafId = null;
+                    lastUpdateTime = performance.now();
+                });
+            }
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mousemove", handleMouseMove, { passive: true });
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
         };
     }, []);
 
@@ -518,17 +536,11 @@ export function BoxChat() {
             )}
 
             {inputFocused && (
-                <motion.div
+                <div
                     className="fixed w-[50rem] h-[50rem] rounded-full pointer-events-none z-0 opacity-[0.02] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500 blur-[96px]"
-                    animate={{
-                        x: mousePosition.x - 400,
-                        y: mousePosition.y - 400,
-                    }}
-                    transition={{
-                        type: "spring",
-                        damping: 25,
-                        stiffness: 150,
-                        mass: 0.5,
+                    style={{
+                        transform: `translate(${mousePosition.x - 400}px, ${mousePosition.y - 400}px)`,
+                        transition: "transform 0.1s ease-out",
                     }}
                 />
             )}

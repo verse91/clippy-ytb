@@ -9,7 +9,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 interface NavbarProps {
     children: React.ReactNode;
@@ -54,16 +54,29 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     const { scrollY } = useScroll({
         target: ref,
         offset: ["start start", "end start"],
+        layoutEffect: false, // Use effect instead of layoutEffect for better performance
     });
     const [visible, setVisible] = useState<boolean>(false);
+    const rafRef = useRef<number | null>(null);
 
     useMotionValueEvent(scrollY, "change", (latest) => {
-        if (latest > 100) {
-            setVisible(true);
-        } else {
-            setVisible(false);
+        // Throttle updates using RAF to reduce CPU usage
+        if (rafRef.current === null) {
+            rafRef.current = requestAnimationFrame(() => {
+                const shouldBeVisible = latest > 100;
+                setVisible(prev => prev !== shouldBeVisible ? shouldBeVisible : prev);
+                rafRef.current = null;
+            });
         }
     });
+
+    useEffect(() => {
+        return () => {
+            if (rafRef.current !== null) {
+                cancelAnimationFrame(rafRef.current);
+            }
+        };
+    }, []);
 
     return (
         <motion.div

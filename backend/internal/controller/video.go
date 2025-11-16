@@ -68,7 +68,6 @@ func (vc *VideoController) DownloadHandler(c fiber.Ctx) error {
 		return response.ErrorResponse(c, response.ErrURLRequired, "URL is required")
 	}
 
-	// Validate URL format and scheme
 	parsedURL, err := url.ParseRequestURI(req.URL)
 	if err != nil {
 		logger.Log.Warn("Invalid URL format",
@@ -143,30 +142,25 @@ func (vc *VideoController) StreamDownloadStatus(c fiber.Ctx) error {
 		return response.ErrorResponse(c, response.ErrDownloadIDRequired, "Download ID is required")
 	}
 
-	// Lưu fasthttp context ngay lập tức
 	fasthttpCtx := c.Context()
 
-	// Setup SSE headers
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
 	c.Set("Transfer-Encoding", "chunked")
 	c.Set("X-Accel-Buffering", "no")
 
-	// Không dùng c.Context() bên trong goroutine
 	return c.SendStream(fasthttp.NewStreamReader(func(w *bufio.Writer) {
 		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 
 		for {
 			select {
-			// ✅ Dừng khi client ngắt kết nối
 			case <-fasthttpCtx.Done():
 				logger.Log.Info("Client disconnected from SSE",
 					zap.String("download_id", downloadID))
 				return
 
-			// ✅ Poll mỗi giây
 			case <-ticker.C:
 				status, err := vc.VideoService.GetDownloadStatus(downloadID)
 				if err != nil {

@@ -12,22 +12,16 @@ interface TypingPopupProps {
   widthClassName?: string;
 }
 
-// Typing dots animation component
+// Typing dots animation component - optimized with CSS
 function TypingDots() {
   return (
     <div className="flex space-x-1">
       {[0, 1, 2].map((i) => (
-        <motion.div
+        <div
           key={i}
-          className="w-1.5 h-1.5 bg-white/70 rounded-full"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.1,
+          className="w-1.5 h-1.5 bg-white/70 rounded-full typing-dot"
+          style={{
+            animationDelay: `${i * 0.1}s`,
           }}
         />
       ))}

@@ -18,12 +18,11 @@ export default function Home() {
                     style={{ fontFamily: "SF-Pro-Display, Arial, sans-serif" }}
                 >
                     <div className="flex flex-col items-center gap-2 sm:gap-4 w-full max-w-7xl">
-                        <TextShimmerWave
+                        <h1
                             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold pointer-events-none select-none text-center px-4"
-                            duration={3}
                         >
                             From seconds to sensations.
-                        </TextShimmerWave>
+                        </h1>
                         <div className="flex flex-col items-center w-full gap-4 sm:gap-6 lg:gap-10">
                             <ShinyText
                                 text="Turn raw clips into viral hits with Clippy"

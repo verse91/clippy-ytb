@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 interface UseUserCreditsReturn {
     userCredits: number;
     loading: boolean;
@@ -14,6 +14,7 @@ export const useUserCredits = (
     const [userCredits, setUserCredits] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const fetchUserCredits = useCallback(async () => {
         if (!userId) {
@@ -21,6 +22,13 @@ export const useUserCredits = (
             setError(null);
             return;
         }
+
+        // Cancel previous request to prevent memory leaks
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        abortControllerRef.current = new AbortController();
 
         try {
             setLoading(true);
@@ -32,6 +40,7 @@ export const useUserCredits = (
                     headers: {
                         "Content-Type": "application/json",
                     },
+                    signal: abortControllerRef.current.signal,
                 }
             );
 
@@ -56,18 +65,27 @@ export const useUserCredits = (
                 setUserCredits(0);
             }
         } catch (error) {
-            const errorMessage = `Error fetching user credits: ${error instanceof Error ? error.message : "Unknown error"
-                }`;
+            // Ignore AbortError - request was cancelled intentionally
+            if (error instanceof Error && error.name === 'AbortError') {
+                return;
+            }
+            const errorMessage = `Error fetching user credits: ${error instanceof Error ? error.message : "Unknown error"}`;
             console.error(errorMessage);
             setError(errorMessage);
             setUserCredits(0);
         } finally {
             setLoading(false);
         }
-    }, [userId, API_BASE_URL]);
+    }, [userId]); // Removed API_BASE_URL from deps as it's a constant
 
     useEffect(() => {
         fetchUserCredits();
+        return () => {
+            // Cleanup: abort pending request on unmount
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
     }, [fetchUserCredits]);
 
     return {
